@@ -8,8 +8,9 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
-  - package-ecosystem: pip
-    directory: /
+  - package-ecosystem: terraform
+    directories:
+      - /modules/wif/
     schedule:
       interval: daily
     cooldown:
