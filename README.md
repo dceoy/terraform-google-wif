@@ -13,7 +13,7 @@ Installation
     ```sh
     $ git clone https://github.com/dceoy/terraform-google-wif.git
     $ cd terraform-google-wif
-    ````
+    ```
 
 2.  Install [Google Cloud SDK](https://cloud.google.com/sdk/docs) and authenticate.
 
