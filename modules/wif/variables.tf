@@ -1,22 +1,23 @@
-variable "project_id" {
-  description = "Google Cloud project ID"
-  type        = string
-}
-
-variable "region" {
-  description = "Google Cloud region"
-  type        = string
-  default     = "us-central1"
-}
-
 variable "system_name" {
   description = "System name"
   type        = string
-  default     = "gai"
 }
 
 variable "env_type" {
   description = "Environment type"
   type        = string
-  default     = "dev"
+}
+
+variable "aws_account_id" {
+  description = "AWS Account ID for Workload Identity Federation"
+  type        = string
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "AWS Account ID must be a 12-digit number."
+  }
+}
+
+variable "aws_iam_role_name" {
+  description = "AWS IAM Role name that will access Google Cloud resources"
+  type        = string
 }

@@ -1,0 +1,28 @@
+---
+# Infrastructure Manager Blueprint Configuration
+apiVersion: config.cloud.google.com/v1
+kind: Blueprint
+metadata:
+  name: vertex-ai-gemini-aws-integration
+  namespace: config-management
+spec:
+  sourceType: git
+  git:
+    repo: https://github.com/dceoy/terraform-google-vertexai-with-wif
+    branch: main
+    dir: envs/dev
+  deployment:   # Infrastructure Manager Deployment Configuration
+    name: vertex-ai-gemini-${env_type}
+    location: ${region}
+    serviceAccount: projects/${project_id}/serviceAccounts/infra-manager-sa@${project_id}.iam.gserviceaccount.com   # Service Account for Infrastructure Manager
+    inputValues:  # Terraform Variables
+      system_name: ${system_name}
+      env_type: ${env_type}
+      project_id: ${project_id}
+      region: ${region}
+      aws_account_id: ${aws_account_id}
+      aws_role_name: ${aws_role_name}
+    labels:
+      name: ${system_name}-${env_type}-vertexai-infra-manager-deployment
+      system_name: ${system_name}
+      env_type: ${env_type}
