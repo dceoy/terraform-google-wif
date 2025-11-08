@@ -41,3 +41,7 @@ terraform.rc
 
 # Serena MCP
 .serena/
+
+# Example files to be included
+!example.tfvars
+!example.tfvars.json

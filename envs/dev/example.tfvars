@@ -1,0 +1,5 @@
+project_id       = "my-gcp-project"
+region           = "us-central1"
+system_name      = "gai"
+env_type         = "dev"
+aws_iam_role_arn = "arn:aws:iam::123456789012:role/my-iam-role"
