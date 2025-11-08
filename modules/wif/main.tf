@@ -35,8 +35,8 @@ resource "google_iam_workload_identity_pool_provider" "aws" {
     "attribute.aws_role"   = "assertion.arn.extract('assumed-role/{role}/')"
     "attribute.account_id" = "assertion.account"
   }
-  attribute_condition = "assertion.arn == '${local.aws_iam_role_arn}'"
+  attribute_condition = "assertion.arn == '${var.aws_iam_role_arn}'"
   aws {
-    account_id = var.aws_account_id
+    account_id = local.aws_account_id
   }
 }

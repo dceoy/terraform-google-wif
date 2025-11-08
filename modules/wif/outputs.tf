@@ -17,12 +17,3 @@ output "sts_audience" {
   description = "Audience for STS token exchange"
   value       = "//iam.googleapis.com/${google_iam_workload_identity_pool_provider.aws.name}"
 }
-
-output "aws_configuration" {
-  description = "AWS configuration instructions"
-  value = {
-    role_arn               = local.aws_iam_role_arn
-    workload_identity_pool = google_iam_workload_identity_pool.aws.name
-    provider               = google_iam_workload_identity_pool_provider.aws.name
-  }
-}
