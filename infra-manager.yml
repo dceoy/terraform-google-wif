@@ -20,8 +20,7 @@ spec:
       env_type: ${env_type}
       project_id: ${project_id}
       region: ${region}
-      aws_account_id: ${aws_account_id}
-      aws_role_name: ${aws_role_name}
+      aws_iam_role_arn: ${aws_iam_role_arn}
     labels:
       name: ${system_name}-${env_type}-vertexai-infra-manager-deployment
       system_name: ${system_name}

@@ -8,16 +8,11 @@ variable "env_type" {
   type        = string
 }
 
-variable "aws_account_id" {
-  description = "AWS Account ID for Workload Identity Federation"
+variable "aws_iam_role_arn" {
+  description = "AWS IAM role ARN that is authorized for Workload Identity Federation"
   type        = string
   validation {
-    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
-    error_message = "AWS Account ID must be a 12-digit number."
+    condition     = can(regex("^arn:aws:(?:iam|sts)::[0-9]{12}:(?:assumed-role|role)/[\\w+=,.@-]+(?:/.*)?$", var.aws_iam_role_arn))
+    error_message = "AWS IAM role ARN must match arn:aws:iam::123456789012:role/role-name or arn:aws:sts::123456789012:assumed-role/role-name formats."
   }
-}
-
-variable "aws_iam_role_name" {
-  description = "AWS IAM Role name that will access Google Cloud resources"
-  type        = string
 }
