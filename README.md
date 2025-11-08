@@ -21,24 +21,43 @@ Installation
 
 4.  Activate required Google Cloud APIs.
 
-5.  Generates a speculative execution plan. (Optional)
+5.  Copy `envs/dev/example.tfvars` to `envs/dev/terraform.tfvars` and set your variables.
+
+6.  Create a preview.
 
     ```sh
-    $ GOOGLE_CLOUD_PROJECT_ID='vertexai'
-    $ GOOGLE_CLOUD_REGION='us-central1'
-    $ gcloud infra-manager deployments preview terraform-google-vertexai-with-wif \
-        --location="${GOOGLE_CLOUD_REGION}" \
-        --terraform-working-directory='envs/dev/' \
-        --input-values="project_id=${GOOGLE_CLOUD_PROJECT_ID},region=${GOOGLE_CLOUD_REGION}"
+    $ PROJECT_ID='my-gcp-project-id'
+    $ LOCATION='us-central1'
+    $ PREVIEW_ID='my-preview-id'
+    $ gcloud infra-manager previews create \
+        "projects/${PROJECT_ID}/locations/${LOCATION}/previews/${PREVIEW_ID}" \
+        --local-source='envs/dev'
+    $ gcloud infra-manager previews describe \
+        "projects/${PROJECT_ID}/locations/${LOCATION}/previews/${PREVIEW_ID}"
+    $ gcloud infra-manager previews delete \
+        "projects/${PROJECT_ID}/locations/${LOCATION}/previews/${PREVIEW_ID}"
     ```
 
-6.  Creates or updates infrastructure.
+7.  Create or update a deployment.
 
     ```sh
-    $ GOOGLE_CLOUD_PROJECT_ID='vertexai'
-    $ GOOGLE_CLOUD_REGION='us-central1'
-    $ gcloud infra-manager deployments create terraform-google-vertexai-with-wif \
-        --location="${GOOGLE_CLOUD_REGION}" \
-        --terraform-working-directory='envs/dev/' \
-        --input-values="project_id=${GOOGLE_CLOUD_PROJECT_ID},region=${GOOGLE_CLOUD_REGION}"
+    $ PROJECT_ID='my-gcp-project-id'
+    $ LOCATION='us-central1'
+    $ DEPLOYMENT_ID='my-deployment-id'
+    $ gcloud infra-manager deployments apply \
+        "projects/${PROJECT_ID}/locations/${LOCATION}/deployments/${DEPLOYMENT_ID}" \
+        --local-source='envs/dev'
+    $ gcloud infra-manager deployments describe \
+        "projects/${PROJECT_ID}/locations/${LOCATION}/deployments/${DEPLOYMENT_ID}"
     ```
+
+Cleanup
+-------
+
+```sh
+$ PROJECT_ID='my-gcp-project-id'
+$ LOCATION='us-central1'
+$ DEPLOYMENT_ID='my-deployment-id'
+$ gcloud infra-manager deployments delete \
+    "projects/${PROJECT_ID}/locations/${LOCATION}/deployments/${DEPLOYMENT_ID}"
+```
