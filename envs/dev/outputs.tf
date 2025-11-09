@@ -39,6 +39,6 @@ output "google_service_account_iam_member_etag" {
 }
 
 output "google_project_iam_member_etag" {
-  description = "ETag of the project IAM member binding"
+  description = "ETags of the project IAM member bindings keyed by role"
   value       = module.wif.google_project_iam_member_etag
 }

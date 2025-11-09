@@ -58,9 +58,10 @@ resource "google_service_account_iam_member" "wif" {
 }
 
 resource "google_project_iam_member" "vertexai" {
-  member  = "serviceAccount:${google_service_account.wif.email}"
-  role    = "roles/aiplatform.user"
-  project = local.project_id
+  for_each = toset(var.google_project_iam_member_roles)
+  member   = "serviceAccount:${google_service_account.wif.email}"
+  role     = each.value
+  project  = local.project_id
   dynamic "condition" {
     for_each = var.project_iam_member_condition_expression != null && var.project_iam_member_condition_title != null ? [true] : []
     content {

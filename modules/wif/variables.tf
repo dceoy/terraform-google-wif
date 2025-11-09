@@ -60,6 +60,14 @@ variable "project_service_disable_dependent_services" {
   default     = true
 }
 
+variable "google_project_iam_member_roles" {
+  description = "List of project-level IAM roles to grant to the WIF service account"
+  type        = list(string)
+  default = [
+    "roles/aiplatform.user"
+  ]
+}
+
 variable "service_account_create_ignore_already_exists" {
   description = "Ignore AlreadyExists errors when creating the service account"
   type        = bool
