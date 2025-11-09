@@ -57,7 +57,7 @@ resource "google_service_account_iam_member" "wif" {
   }
 }
 
-resource "google_project_iam_member" "vertexai" {
+resource "google_project_iam_member" "wif" {
   for_each = toset(var.google_project_iam_member_roles)
   member   = "serviceAccount:${google_service_account.wif.email}"
   role     = each.value

@@ -40,5 +40,5 @@ output "google_service_account_iam_member_etag" {
 
 output "google_project_iam_member_etag" {
   description = "ETags of the project IAM member bindings keyed by role"
-  value       = { for role, binding in google_project_iam_member.vertexai : role => binding.etag }
+  value       = { for role, binding in google_project_iam_member.wif : role => binding.etag }
 }
