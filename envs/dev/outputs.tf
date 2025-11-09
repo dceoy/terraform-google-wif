@@ -8,14 +8,9 @@ output "workload_identity_pool_provider_name" {
   value       = module.wif.workload_identity_pool_provider_name
 }
 
-output "sts_endpoint" {
-  description = "STS endpoint for token exchange"
-  value       = module.wif.sts_endpoint
-}
-
-output "sts_audience" {
-  description = "Audience for STS token exchange"
-  value       = module.wif.sts_audience
+output "project_service_ids" {
+  description = "List of enabled Google API service IDs"
+  value       = module.wif.project_service_ids
 }
 
 output "service_account_email" {
@@ -28,7 +23,22 @@ output "service_account_name" {
   value       = module.vertexai.service_account_name
 }
 
-output "vertex_ai_endpoint" {
-  description = "Vertex AI endpoint for the specified region"
-  value       = module.vertexai.vertex_ai_endpoint
+output "service_account_unique_id" {
+  description = "Unique ID of the Vertex AI service account"
+  value       = module.vertexai.service_account_unique_id
+}
+
+output "service_account_member" {
+  description = "IAM member string for the Vertex AI service account"
+  value       = module.vertexai.service_account_member
+}
+
+output "google_service_account_iam_member_etag" {
+  description = "ETag of the service account IAM member binding"
+  value       = module.vertexai.google_service_account_iam_member_etag
+}
+
+output "google_project_iam_member_etag" {
+  description = "ETag of the project IAM member binding"
+  value       = module.vertexai.google_project_iam_member_etag
 }
