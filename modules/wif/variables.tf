@@ -8,12 +8,21 @@ variable "env_type" {
   type        = string
 }
 
-variable "aws_iam_role_arn" {
-  description = "AWS IAM role ARN that is authorized for Workload Identity Federation"
+variable "aws_account_id" {
+  description = "AWS account ID that owns the IAM role authorized for Workload Identity Federation"
   type        = string
   validation {
-    condition     = can(regex("^arn:aws:(?:iam|sts)::[0-9]{12}:(?:assumed-role|role)/[\\w+=,.@-]+(?:/.*)?$", var.aws_iam_role_arn))
-    error_message = "AWS IAM role ARN must match arn:aws:iam::123456789012:role/role-name or arn:aws:sts::123456789012:assumed-role/role-name formats."
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "AWS account ID must be a 12-digit numeric string."
+  }
+}
+
+variable "aws_iam_role_name" {
+  description = "AWS IAM role name that is authorized for Workload Identity Federation"
+  type        = string
+  validation {
+    condition     = can(regex("^[\\w+=,.@-]+(?:/[\\w+=,.@-]+)*$", var.aws_iam_role_name))
+    error_message = "AWS IAM role name may contain letters, numbers, and the characters +=,.@- with optional path segments separated by '/'."
   }
 }
 
@@ -49,4 +58,46 @@ variable "project_service_disable_dependent_services" {
   description = "Disable any services dependent on the API when disabling it"
   type        = bool
   default     = true
+}
+
+variable "service_account_create_ignore_already_exists" {
+  description = "Ignore AlreadyExists errors when creating the service account"
+  type        = bool
+  default     = false
+}
+
+variable "service_account_iam_condition_expression" {
+  description = "Optional CEL expression for the service account IAM binding"
+  type        = string
+  default     = null
+}
+
+variable "service_account_iam_condition_title" {
+  description = "Title for the service account IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "service_account_iam_condition_description" {
+  description = "Description for the service account IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_condition_expression" {
+  description = "Optional CEL expression for the project IAM binding"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_condition_title" {
+  description = "Title for the project IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_condition_description" {
+  description = "Description for the project IAM condition"
+  type        = string
+  default     = null
 }

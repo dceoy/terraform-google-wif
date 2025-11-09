@@ -15,30 +15,30 @@ output "project_service_ids" {
 
 output "service_account_email" {
   description = "Email of the Vertex AI service account"
-  value       = module.vertexai.service_account_email
+  value       = module.wif.service_account_email
 }
 
 output "service_account_name" {
   description = "Full name of the Vertex AI service account resource"
-  value       = module.vertexai.service_account_name
+  value       = module.wif.service_account_name
 }
 
 output "service_account_unique_id" {
   description = "Unique ID of the Vertex AI service account"
-  value       = module.vertexai.service_account_unique_id
+  value       = module.wif.service_account_unique_id
 }
 
 output "service_account_member" {
   description = "IAM member string for the Vertex AI service account"
-  value       = module.vertexai.service_account_member
+  value       = module.wif.service_account_member
 }
 
 output "google_service_account_iam_member_etag" {
   description = "ETag of the service account IAM member binding"
-  value       = module.vertexai.google_service_account_iam_member_etag
+  value       = module.wif.google_service_account_iam_member_etag
 }
 
 output "google_project_iam_member_etag" {
   description = "ETag of the project IAM member binding"
-  value       = module.vertexai.google_project_iam_member_etag
+  value       = module.wif.google_project_iam_member_etag
 }
