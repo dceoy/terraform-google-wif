@@ -19,11 +19,20 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "aws_iam_role_arn" {
-  description = "AWS IAM role ARN authorized for Workload Identity Federation"
+variable "aws_account_id" {
+  description = "AWS account ID that owns the IAM role authorized for Workload Identity Federation"
   type        = string
   validation {
-    condition     = can(regex("^arn:aws:(?:iam|sts)::[0-9]{12}:(?:assumed-role|role)/[\\w+=,.@-]+(?:/.*)?$", var.aws_iam_role_arn))
-    error_message = "AWS IAM role ARN must match arn:aws:iam::123456789012:role/role-name or arn:aws:sts::123456789012:assumed-role/role-name formats."
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "AWS account ID must be a 12-digit numeric string."
+  }
+}
+
+variable "aws_iam_role_name" {
+  description = "AWS IAM role name authorized for Workload Identity Federation"
+  type        = string
+  validation {
+    condition     = can(regex("^[\\w+=,.@-]+(?:/[\\w+=,.@-]+)*$", var.aws_iam_role_name))
+    error_message = "AWS IAM role name may contain letters, numbers, and the characters +=,.@- with optional path segments separated by '/'."
   }
 }
