@@ -16,3 +16,37 @@ variable "aws_iam_role_arn" {
     error_message = "AWS IAM role ARN must match arn:aws:iam::123456789012:role/role-name or arn:aws:sts::123456789012:assumed-role/role-name formats."
   }
 }
+
+variable "project_id" {
+  description = "Optional project ID override for all Google resources; defaults to the provider project"
+  type        = string
+  default     = null
+}
+
+variable "enabled_apis" {
+  description = "List of Google APIs that need to be enabled before creating Workload Identity Federation resources"
+  type        = list(string)
+  default = [
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "sts.googleapis.com",
+    "aiplatform.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "storage.googleapis.com",
+    "compute.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com"
+  ]
+}
+
+variable "project_service_disable_on_destroy" {
+  description = "Set to true to disable the API when destroying google_project_service"
+  type        = bool
+  default     = true
+}
+
+variable "project_service_disable_dependent_services" {
+  description = "Disable any services dependent on the API when disabling it"
+  type        = bool
+  default     = true
+}
