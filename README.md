@@ -1,9 +1,9 @@
-terraform-google-vertexai-with-wif
-==================================
+terraform-google-wif-for-aws
+============================
 
-Terraform modules of Google Cloud Vertex AI with Workload Identity Federation for AWS
+Terraform modules of Google Cloud Workload Identity Federation for AWS
 
-[![CI](https://github.com/dceoy/terraform-google-vertexai-with-wif/actions/workflows/ci.yml/badge.svg)](https://github.com/dceoy/terraform-google-vertexai-with-wif/actions/workflows/ci.yml)
+[![CI](https://github.com/dceoy/terraform-google-wif-for-aws/actions/workflows/ci.yml/badge.svg)](https://github.com/dceoy/terraform-google-wif-for-aws/actions/workflows/ci.yml)
 
 Installation
 ------------
@@ -11,8 +11,8 @@ Installation
 1.  Check out the repository.
 
     ```sh
-    $ git clone https://github.com/dceoy/terraform-google-vertexai-with-wif.git
-    $ cd terraform-google-vertexai-with-wif
+    $ git clone https://github.com/dceoy/terraform-google-wif-for-aws.git
+    $ cd terraform-google-wif-for-aws
     ```
 
 2.  Install [Google Cloud SDK](https://cloud.google.com/sdk/docs) and authenticate.
