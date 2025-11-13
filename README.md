@@ -21,11 +21,11 @@ Installation
 
 4.  Activate required Google Cloud APIs.
 
-5.  Create `envs/dev/terraform.tfvars` and set the variables.
+5.  Create `envs/dev/terraform.tfvars` and set the variables as follows:
 
     ```hcl
-    project_id        = "my-gcp-project"
-    region            = "us-central1"
+    project_id       = "my-gcp-project-id"
+    region           = "us-central1"
     system_name       = "gai"
     env_type          = "dev"
     aws_account_id    = "123456789012"
