@@ -7,6 +7,7 @@ resource "google_project_service" "apis" {
 }
 
 resource "google_iam_workload_identity_pool" "aws" {
+  count                     = local.aws_sts_role_arn != null ? 1 : 0
   depends_on                = [google_project_service.apis]
   workload_identity_pool_id = "${var.system_name}-${var.env_type}-aws-wip"
   display_name              = "${var.system_name}-${var.env_type}-aws-wip"
@@ -16,7 +17,8 @@ resource "google_iam_workload_identity_pool" "aws" {
 }
 
 resource "google_iam_workload_identity_pool_provider" "aws" {
-  workload_identity_pool_id          = google_iam_workload_identity_pool.aws.workload_identity_pool_id
+  count                              = length(google_iam_workload_identity_pool.aws) > 0 ? 1 : 0
+  workload_identity_pool_id          = google_iam_workload_identity_pool.aws[0].workload_identity_pool_id
   workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-aws-wip-provider"
   display_name                       = "Workload Identity Pool Provider for AWS IAM role"
   description                        = "OIDC provider for AWS IAM role"
@@ -33,9 +35,9 @@ resource "google_iam_workload_identity_pool_provider" "aws" {
   }
 }
 
-resource "google_service_account" "wif" {
-  depends_on                   = [google_project_service.apis]
-  account_id                   = "${var.system_name}-${var.env_type}-wif-sa"
+resource "google_service_account" "aws" {
+  count                        = length(google_iam_workload_identity_pool.aws) > 0 ? 1 : 0
+  account_id                   = "${var.system_name}-${var.env_type}-wif-aws-sa"
   display_name                 = "Service Account for Workload Identity Federation from AWS"
   description                  = "Service account to be used with Workload Identity Federation from AWS"
   disabled                     = false
@@ -43,9 +45,10 @@ resource "google_service_account" "wif" {
   create_ignore_already_exists = var.service_account_create_ignore_already_exists
 }
 
-resource "google_service_account_iam_member" "wif" {
-  service_account_id = google_service_account.wif.name
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.aws.name}/attribute.aws_role/${var.aws_iam_role_name}"
+resource "google_service_account_iam_member" "aws" {
+  count              = length(google_service_account.aws) > 0 ? 1 : 0
+  service_account_id = google_service_account.aws[0].name
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.aws[0].name}/attribute.aws_role/${var.aws_iam_role_name}"
   role               = "roles/iam.workloadIdentityUser"
   dynamic "condition" {
     for_each = var.service_account_iam_condition_expression != null && var.service_account_iam_condition_title != null ? [true] : []
@@ -57,9 +60,80 @@ resource "google_service_account_iam_member" "wif" {
   }
 }
 
-resource "google_project_iam_member" "wif" {
-  for_each = toset(var.google_project_iam_member_roles)
-  member   = "serviceAccount:${google_service_account.wif.email}"
+resource "google_project_iam_member" "aws" {
+  for_each = toset(length(google_service_account.aws) > 0 ? var.project_iam_member_roles_for_aws : [])
+  member   = "serviceAccount:${google_service_account.aws[0].email}"
+  role     = each.value
+  project  = local.project_id
+  dynamic "condition" {
+    for_each = var.project_iam_member_condition_expression != null && var.project_iam_member_condition_title != null ? [true] : []
+    content {
+      expression  = var.project_iam_member_condition_expression
+      title       = var.project_iam_member_condition_title
+      description = var.project_iam_member_condition_description
+    }
+  }
+}
+
+resource "google_iam_workload_identity_pool" "gha" {
+  count                     = var.github_repository != null ? 1 : 0
+  depends_on                = [google_project_service.apis]
+  workload_identity_pool_id = "${var.system_name}-${var.env_type}-gha-wip"
+  display_name              = "${var.system_name}-${var.env_type}-gha-wip"
+  description               = "Workload Identity Pool for GitHub Actions OIDC authentication"
+  disabled                  = false
+  project                   = local.project_id
+}
+
+resource "google_iam_workload_identity_pool_provider" "gha" {
+  count                              = length(google_iam_workload_identity_pool.gha) > 0 ? 1 : 0
+  workload_identity_pool_id          = google_iam_workload_identity_pool.gha[0].workload_identity_pool_id
+  workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-gha-wip-provider"
+  display_name                       = "Workload Identity Pool Provider for GitHub Actions"
+  description                        = "OIDC provider for GitHub Actions"
+  disabled                           = false
+  project                            = local.project_id
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.repository" = "assertion.repository"
+    "attribute.ref"        = "assertion.ref"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.workflow"   = "assertion.workflow"
+  }
+  attribute_condition = "assertion.repository == '${var.github_repository}'"
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_service_account" "gha" {
+  count                        = length(google_iam_workload_identity_pool.gha) > 0 ? 1 : 0
+  account_id                   = "${var.system_name}-${var.env_type}-wif-gha-sa"
+  display_name                 = "Service Account for Workload Identity Federation from GitHub Actions"
+  description                  = "Service account to be used with Workload Identity Federation from GitHub Actions"
+  disabled                     = false
+  project                      = local.project_id
+  create_ignore_already_exists = var.service_account_create_ignore_already_exists
+}
+
+resource "google_service_account_iam_member" "gha" {
+  count              = length(google_service_account.gha) > 0 ? 1 : 0
+  service_account_id = google_service_account.gha[0].name
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.gha[0].name}/attribute.repository/${var.github_repository}"
+  role               = "roles/iam.workloadIdentityUser"
+  dynamic "condition" {
+    for_each = var.service_account_iam_condition_expression != null && var.service_account_iam_condition_title != null ? [true] : []
+    content {
+      expression  = var.service_account_iam_condition_expression
+      title       = var.service_account_iam_condition_title
+      description = var.service_account_iam_condition_description
+    }
+  }
+}
+
+resource "google_project_iam_member" "gha" {
+  for_each = toset(length(google_service_account.gha) > 0 ? var.project_iam_member_roles_for_gha : [])
+  member   = "serviceAccount:${google_service_account.gha[0].email}"
   role     = each.value
   project  = local.project_id
   dynamic "condition" {
