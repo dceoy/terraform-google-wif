@@ -1,7 +1,7 @@
 terraform-google-wif
 ====================
 
-Terraform modules of Google Cloud Workload Identity Federation
+Terraform modules of Google Cloud Workload Identity Federation for AWS and GitHub Actions.
 
 [![CI](https://github.com/dceoy/terraform-google-wif/actions/workflows/ci.yml/badge.svg)](https://github.com/dceoy/terraform-google-wif/actions/workflows/ci.yml)
 
@@ -21,15 +21,14 @@ Installation
 
 4.  Activate required Google Cloud APIs.
 
-5.  Create `envs/dev/terraform.tfvars` and set the variables.
+5.  Create `envs/dev/terraform.tfvars` and set the variables as follows:
 
     ```hcl
-    project_id        = "my-gcp-project"
-    region            = "us-central1"
     system_name       = "gai"
     env_type          = "dev"
     aws_account_id    = "123456789012"
     aws_iam_role_name = "my-iam-role"
+    github_repository = "my-github-username/my-repo"
     ```
 
 6.  Create a preview.
