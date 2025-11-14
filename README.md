@@ -21,7 +21,16 @@ Installation
 
 4.  Activate required Google Cloud APIs.
 
-5.  Copy `envs/dev/example.tfvars` to `envs/dev/terraform.tfvars` and set your variables.
+5.  Create `envs/dev/terraform.tfvars` and set the variables.
+
+    ```hcl
+    project_id        = "my-gcp-project"
+    region            = "us-central1"
+    system_name       = "gai"
+    env_type          = "dev"
+    aws_account_id    = "123456789012"
+    aws_iam_role_name = "my-iam-role"
+    ```
 
 6.  Create a preview.
 

@@ -1,6 +1,0 @@
-project_id        = "my-gcp-project"
-region            = "us-central1"
-system_name       = "gai"
-env_type          = "dev"
-aws_account_id    = "123456789012"
-aws_iam_role_name = "my-iam-role"
