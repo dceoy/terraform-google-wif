@@ -39,7 +39,7 @@ variable "github_repository" {
 }
 
 variable "project_id" {
-  description = "Optional project ID override for all Google resources; defaults to the provider project"
+  description = "Project ID for Google Cloud resources"
   type        = string
   default     = null
 }

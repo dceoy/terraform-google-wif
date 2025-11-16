@@ -8,17 +8,6 @@ variable "env_type" {
   type        = string
 }
 
-variable "project_id" {
-  description = "Google Cloud project ID"
-  type        = string
-}
-
-variable "region" {
-  description = "Google Cloud region"
-  type        = string
-  default     = "us-central1"
-}
-
 variable "aws_account_id" {
   description = "AWS account ID that owns the IAM role authorized for Workload Identity Federation"
   type        = string
