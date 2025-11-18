@@ -44,6 +44,12 @@ variable "project_id" {
   default     = null
 }
 
+variable "region" {
+  description = "Region for Google Cloud resources"
+  type        = string
+  default     = null
+}
+
 variable "enabled_apis" {
   description = "List of Google APIs that need to be enabled before creating Workload Identity Federation resources"
   type        = list(string)
@@ -51,25 +57,24 @@ variable "enabled_apis" {
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
-    "aiplatform.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "storage.googleapis.com",
-    "compute.googleapis.com",
     "logging.googleapis.com",
-    "monitoring.googleapis.com"
+    "monitoring.googleapis.com",
+    "aiplatform.googleapis.com"
   ]
 }
 
 variable "project_service_disable_on_destroy" {
   description = "Set to true to disable the API when destroying google_project_service"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "project_service_disable_dependent_services" {
   description = "Disable any services dependent on the API when disabling it"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "service_account_create_ignore_already_exists" {
@@ -105,7 +110,14 @@ variable "project_iam_member_roles_for_aws" {
 variable "project_iam_member_roles_for_gha" {
   description = "List of project-level IAM roles to grant to the WIF service account for GitHub Actions"
   type        = list(string)
-  default     = ["roles/config.admin"]
+  default = [
+    "roles/config.admin",
+    "roles/storage.admin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/iam.workloadIdentityPoolAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/resourcemanager.projectIamAdmin"
+  ]
 }
 
 variable "project_iam_member_condition_expression" {

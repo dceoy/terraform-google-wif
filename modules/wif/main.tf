@@ -9,8 +9,8 @@ resource "google_project_service" "apis" {
 resource "google_iam_workload_identity_pool" "aws" {
   count                     = local.aws_sts_role_arn != null ? 1 : 0
   depends_on                = [google_project_service.apis]
-  workload_identity_pool_id = "${var.system_name}-${var.env_type}-aws-wip"
-  display_name              = "${var.system_name}-${var.env_type}-aws-wip"
+  workload_identity_pool_id = "${var.system_name}-${var.env_type}-aws-wi-pool"
+  display_name              = "${var.system_name}-${var.env_type}-aws-wi-pool"
   description               = "Workload Identity Pool for AWS IAM role authentication"
   disabled                  = false
   project                   = local.project_id
@@ -19,8 +19,8 @@ resource "google_iam_workload_identity_pool" "aws" {
 resource "google_iam_workload_identity_pool_provider" "aws" {
   count                              = length(google_iam_workload_identity_pool.aws) > 0 ? 1 : 0
   workload_identity_pool_id          = google_iam_workload_identity_pool.aws[0].workload_identity_pool_id
-  workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-aws-wip-provider"
-  display_name                       = "Workload Identity Pool Provider for AWS IAM role"
+  workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-aws-wi-pool-provider"
+  display_name                       = "${var.system_name}-${var.env_type}-aws-wi-pool-provider"
   description                        = "OIDC provider for AWS IAM role"
   disabled                           = false
   attribute_mapping = {
@@ -78,8 +78,8 @@ resource "google_project_iam_member" "aws" {
 resource "google_iam_workload_identity_pool" "gha" {
   count                     = var.github_repository != null ? 1 : 0
   depends_on                = [google_project_service.apis]
-  workload_identity_pool_id = "${var.system_name}-${var.env_type}-gha-wip"
-  display_name              = "${var.system_name}-${var.env_type}-gha-wip"
+  workload_identity_pool_id = "${var.system_name}-${var.env_type}-gha-wi-pool"
+  display_name              = "${var.system_name}-${var.env_type}-gha-wi-pool"
   description               = "Workload Identity Pool for GitHub Actions OIDC authentication"
   disabled                  = false
   project                   = local.project_id
@@ -88,8 +88,8 @@ resource "google_iam_workload_identity_pool" "gha" {
 resource "google_iam_workload_identity_pool_provider" "gha" {
   count                              = length(google_iam_workload_identity_pool.gha) > 0 ? 1 : 0
   workload_identity_pool_id          = google_iam_workload_identity_pool.gha[0].workload_identity_pool_id
-  workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-gha-wip-provider"
-  display_name                       = "Workload Identity Pool Provider for GitHub Actions"
+  workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-gha-wi-pool-provider"
+  display_name                       = "${var.system_name}-${var.env_type}-gha-wi-pool-provider"
   description                        = "OIDC provider for GitHub Actions"
   disabled                           = false
   project                            = local.project_id
