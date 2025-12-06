@@ -104,7 +104,10 @@ variable "service_account_iam_condition_description" {
 variable "project_iam_member_roles_for_aws" {
   description = "List of project-level IAM roles to grant to the WIF service account for AWS"
   type        = list(string)
-  default     = ["roles/aiplatform.user"]
+  default = [
+    "roles/aiplatform.user",
+    "roles/storage.objectAdmin"
+  ]
 }
 
 variable "project_iam_member_roles_for_gha" {
@@ -136,4 +139,94 @@ variable "project_iam_member_condition_description" {
   description = "Description for the project IAM condition"
   type        = string
   default     = null
+}
+
+variable "storage_bucket_name" {
+  description = "Name of the storage bucket to be created"
+  type        = string
+  default     = null
+}
+
+variable "force_destroy" {
+  description = "Whether to delete all contained objects when deleting the bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_storage_class" {
+  description = "Storage class of the storage bucket"
+  type        = string
+  default     = "STANDARD"
+  validation {
+    condition     = contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_storage_class)
+    error_message = "Storage class must be one of STANDARD, MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, or ARCHIVE."
+  }
+}
+
+variable "storage_versioning_enabled" {
+  description = "Whether to enable versioning for objects in the storage bucket"
+  type        = bool
+  default     = true
+}
+
+variable "storage_autoclass_enabled" {
+  description = "Whether to enable autoclass for the storage bucket"
+  type        = bool
+  default     = true
+}
+
+variable "storage_default_event_based_hold" {
+  description = "Whether to automatically apply an eventBasedHold to new objects added to the storage bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_retention_policy_retention_period" {
+  description = "The period of time, in seconds, that objects in the storage bucket must be retained and cannot be deleted, overwritten, or archived"
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.storage_retention_policy_retention_period >= 0 && var.storage_retention_policy_retention_period < 2147483647
+    error_message = "Retention period must be between 0 and 2,147,483,647 seconds."
+  }
+}
+
+variable "storage_requester_pays" {
+  description = "Whether to enable requester pays on the storage bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_rpo" {
+  description = "Recovery point objective for cross-region replication of the storage bucket (applicable only for dual and multi-region buckets)"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_rpo == null || contains(["DEFAULT", "ASYNC_TURBO"], var.storage_rpo)
+    error_message = "RPO must be either DEFAULT or ASYNC_TURBO."
+  }
+}
+
+variable "storage_logging_log_bucket" {
+  description = "Log bucket name for access and storage logs of the storage bucket"
+  type        = string
+  default     = null
+}
+
+variable "storage_encryption_default_kms_key_name" {
+  description = "ID of a Cloud KMS key that will be used to encrypt objects inserted into the storage bucket"
+  type        = string
+  default     = null
+}
+
+variable "storage_custom_placement_config_data_locations" {
+  description = "List of individual regions that comprise a dual-region storage bucket"
+  type        = list(string)
+  default     = []
+}
+
+variable "storage_hierarchical_namespace_enabled" {
+  description = "Whether to enable hierarchical namespace for the storage bucket"
+  type        = bool
+  default     = false
 }
