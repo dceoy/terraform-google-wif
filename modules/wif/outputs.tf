@@ -28,19 +28,14 @@ output "service_account_unique_id_for_aws" {
   value       = length(google_service_account.aws) > 0 ? google_service_account.aws[0].unique_id : null
 }
 
-output "service_account_member_for_aws" {
-  description = "IAM member string for the WIF service account for AWS"
-  value       = length(google_service_account.aws) > 0 ? "serviceAccount:${google_service_account.aws[0].email}" : null
-}
-
-output "google_service_account_iam_member_etag_for_aws" {
-  description = "ETag of the service account IAM member binding for AWS"
-  value       = length(google_service_account_iam_member.aws) > 0 ? google_service_account_iam_member.aws[0].etag : null
-}
-
-output "google_project_iam_member_etag_for_aws" {
+output "project_iam_member_etags_for_aws" {
   description = "ETags of the project IAM member bindings keyed by role for AWS"
-  value       = { for role, binding in google_project_iam_member.aws : role => binding.etag }
+  value       = { for k, v in google_project_iam_member.aws : k => v.etag }
+}
+
+output "service_account_iam_member_etags_for_aws" {
+  description = "ETags of the service account IAM member binding for AWS"
+  value       = { for k, v in google_service_account_iam_member.aws : k => v.etag }
 }
 
 output "workload_identity_pool_name_for_gha" {
@@ -68,17 +63,22 @@ output "service_account_unique_id_for_gha" {
   value       = length(google_service_account.gha) > 0 ? google_service_account.gha[0].unique_id : null
 }
 
-output "service_account_member_for_gha" {
-  description = "IAM member string for the WIF service account for GitHub Actions"
-  value       = length(google_service_account.gha) > 0 ? "serviceAccount:${google_service_account.gha[0].email}" : null
-}
-
-output "google_service_account_iam_member_etag_for_gha" {
-  description = "ETag of the service account IAM member binding for GitHub Actions"
-  value       = length(google_service_account_iam_member.gha) > 0 ? google_service_account_iam_member.gha[0].etag : null
-}
-
-output "google_project_iam_member_etag_for_gha" {
+output "project_iam_member_etags_for_gha" {
   description = "ETags of the project IAM member bindings keyed by role for GitHub Actions"
-  value       = { for role, binding in google_project_iam_member.gha : role => binding.etag }
+  value       = { for k, v in google_project_iam_member.gha : k => v.etag }
+}
+
+output "service_account_iam_member_etags_for_gha" {
+  description = "ETags of the service account IAM member binding for GitHub Actions"
+  value       = { for k, v in google_service_account_iam_member.gha : k => v.etag }
+}
+
+output "storage_bucket_self_link" {
+  description = "URI of the cloud storage bucket"
+  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].self_link : null
+}
+
+output "storage_bucket_url" {
+  description = "Base URL of the cloud storage bucket"
+  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].url : null
 }
