@@ -197,7 +197,7 @@ variable "storage_retention_policy_retention_period" {
   default     = 0
   validation {
     condition     = var.storage_retention_policy_retention_period >= 0 && var.storage_retention_policy_retention_period < 3155760000
-    error_message = "Retention period must be 0 or between 0 and 3,155,760,000 seconds."
+    error_message = "Retention period must be greater than or equal to 0 and less than 3,155,760,000 seconds."
   }
 }
 
