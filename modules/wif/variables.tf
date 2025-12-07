@@ -156,9 +156,9 @@ variable "force_destroy" {
 variable "storage_class" {
   description = "Storage class of the storage bucket"
   type        = string
-  default     = "STANDARD"
+  default     = null
   validation {
-    condition     = contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_class)
+    condition     = var.storage_class == null || contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_class)
     error_message = "Storage class must be one of STANDARD, MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, or ARCHIVE."
   }
 }
@@ -175,6 +175,16 @@ variable "storage_autoclass_enabled" {
   default     = true
 }
 
+variable "storage_autoclass_terminal_storage_class" {
+  description = "Storage class that objects in the storage bucket eventually transition to if they are not read for a certain length of time"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_autoclass_terminal_storage_class == null || contains(["NEARLINE", "ARCHIVE"], var.storage_autoclass_terminal_storage_class)
+    error_message = "Terminal storage class must be either NEARLINE or ARCHIVE."
+  }
+}
+
 variable "storage_default_event_based_hold" {
   description = "Whether to automatically apply an eventBasedHold to new objects added to the storage bucket"
   type        = bool
@@ -186,8 +196,8 @@ variable "storage_retention_policy_retention_period" {
   type        = number
   default     = 0
   validation {
-    condition     = var.storage_retention_policy_retention_period >= 0 && var.storage_retention_policy_retention_period < 2147483647
-    error_message = "Retention period must be between 0 and 2,147,483,647 seconds."
+    condition     = var.storage_retention_policy_retention_period >= 0 && var.storage_retention_policy_retention_period < 3155760000
+    error_message = "Retention period must be 0 or between 0 and 3,155,760,000 seconds."
   }
 }
 

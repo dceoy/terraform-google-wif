@@ -160,14 +160,24 @@ resource "google_storage_bucket" "io" {
   rpo                         = var.storage_rpo
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
-  versioning {
-    enabled = var.storage_versioning_enabled
+  dynamic "versioning" {
+    for_each = var.storage_versioning_enabled != null ? [true] : []
+    content {
+      enabled = var.storage_versioning_enabled
+    }
   }
-  autoclass {
-    enabled = var.storage_autoclass_enabled
+  dynamic "autoclass" {
+    for_each = var.storage_autoclass_enabled != null ? [true] : []
+    content {
+      enabled                = var.storage_autoclass_enabled
+      terminal_storage_class = var.storage_autoclass_terminal_storage_class
+    }
   }
-  hierarchical_namespace {
-    enabled = var.storage_hierarchical_namespace_enabled
+  dynamic "hierarchical_namespace" {
+    for_each = var.storage_hierarchical_namespace_enabled ? [true] : []
+    content {
+      enabled = true
+    }
   }
   dynamic "retention_policy" {
     for_each = var.storage_retention_policy_retention_period > 0 ? [true] : []
