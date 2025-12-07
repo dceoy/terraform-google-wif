@@ -28,18 +28,13 @@ output "service_account_unique_id_for_aws" {
   value       = length(google_service_account.aws) > 0 ? google_service_account.aws[0].unique_id : null
 }
 
-output "service_account_for_aws" {
-  description = "IAM member string for the WIF service account for AWS"
-  value       = length(google_service_account.aws) > 0 ? "serviceAccount:${google_service_account.aws[0].email}" : null
-}
-
 output "project_iam_member_etag_for_aws" {
   description = "ETags of the project IAM member bindings keyed by role for AWS"
   value       = { for k, v in google_project_iam_member.aws : k => v.etag }
 }
 
 output "service_account_iam_member_etag_for_aws" {
-  description = "ETag of the service account IAM member binding for AWS"
+  description = "ETags of the service account IAM member binding for AWS"
   value       = { for k, v in google_service_account_iam_member.aws : k => v.etag }
 }
 
@@ -68,18 +63,13 @@ output "service_account_unique_id_for_gha" {
   value       = length(google_service_account.gha) > 0 ? google_service_account.gha[0].unique_id : null
 }
 
-output "service_account_for_gha" {
-  description = "IAM member string for the WIF service account for GitHub Actions"
-  value       = length(google_service_account.gha) > 0 ? "serviceAccount:${google_service_account.gha[0].email}" : null
-}
-
 output "project_iam_member_etag_for_gha" {
   description = "ETags of the project IAM member bindings keyed by role for GitHub Actions"
   value       = { for k, v in google_project_iam_member.gha : k => v.etag }
 }
 
 output "service_account_iam_member_etag_for_gha" {
-  description = "ETag of the service account IAM member binding for GitHub Actions"
+  description = "ETags of the service account IAM member binding for GitHub Actions"
   value       = { for k, v in google_service_account_iam_member.gha : k => v.etag }
 }
 

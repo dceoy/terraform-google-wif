@@ -153,7 +153,7 @@ resource "google_storage_bucket" "io" {
   project                     = local.project_id
   location                    = local.region
   force_destroy               = var.force_destroy
-  storage_class               = var.storage_storage_class
+  storage_class               = var.storage_class
   default_event_based_hold    = var.storage_default_event_based_hold
   enable_object_retention     = false
   requester_pays              = var.storage_requester_pays

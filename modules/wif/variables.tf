@@ -153,12 +153,12 @@ variable "force_destroy" {
   default     = false
 }
 
-variable "storage_storage_class" {
+variable "storage_class" {
   description = "Storage class of the storage bucket"
   type        = string
   default     = "STANDARD"
   validation {
-    condition     = contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_storage_class)
+    condition     = contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_class)
     error_message = "Storage class must be one of STANDARD, MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, or ARCHIVE."
   }
 }
