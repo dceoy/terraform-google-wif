@@ -146,10 +146,69 @@ resource "google_service_account_iam_member" "gha" {
   }
 }
 
+resource "google_storage_bucket" "logs" {
+  depends_on                  = [google_project_service.apis]
+  count                       = var.storage_logs_bucket_name != null ? 1 : 0
+  name                        = var.storage_logs_bucket_name
+  project                     = local.project_id
+  location                    = local.region
+  force_destroy               = var.force_destroy
+  storage_class               = var.storage_class
+  default_event_based_hold    = var.storage_default_event_based_hold
+  enable_object_retention     = false
+  requester_pays              = var.storage_requester_pays
+  rpo                         = var.storage_rpo
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+  dynamic "versioning" {
+    for_each = var.storage_versioning_enabled != null ? [true] : []
+    content {
+      enabled = var.storage_versioning_enabled
+    }
+  }
+  dynamic "autoclass" {
+    for_each = var.storage_autoclass_enabled != null ? [true] : []
+    content {
+      enabled                = var.storage_autoclass_enabled
+      terminal_storage_class = var.storage_autoclass_terminal_storage_class
+    }
+  }
+  dynamic "hierarchical_namespace" {
+    for_each = var.storage_hierarchical_namespace_enabled ? [true] : []
+    content {
+      enabled = true
+    }
+  }
+  dynamic "retention_policy" {
+    for_each = var.storage_retention_policy_retention_period > 0 ? [true] : []
+    content {
+      is_locked        = false
+      retention_period = var.storage_retention_policy_retention_period
+    }
+  }
+  dynamic "encryption" {
+    for_each = var.storage_encryption_default_kms_key_name != null ? [true] : []
+    content {
+      default_kms_key_name = var.storage_encryption_default_kms_key_name
+    }
+  }
+  dynamic "custom_placement_config" {
+    for_each = length(var.storage_custom_placement_config_data_locations) > 0 ? [true] : []
+    content {
+      data_locations = var.storage_custom_placement_config_data_locations
+    }
+  }
+  labels = {
+    name        = var.storage_logs_bucket_name
+    system-name = var.system_name
+    env-type    = var.env_type
+  }
+}
+
 resource "google_storage_bucket" "io" {
   depends_on                  = [google_project_service.apis]
-  count                       = var.storage_bucket_name != null ? 1 : 0
-  name                        = var.storage_bucket_name
+  count                       = var.storage_io_bucket_name != null ? 1 : 0
+  name                        = var.storage_io_bucket_name
   project                     = local.project_id
   location                    = local.region
   force_destroy               = var.force_destroy
@@ -187,10 +246,10 @@ resource "google_storage_bucket" "io" {
     }
   }
   dynamic "logging" {
-    for_each = var.storage_logging_log_bucket != null ? [true] : []
+    for_each = length(google_storage_bucket.logs) > 0 ? [true] : []
     content {
-      log_bucket        = var.storage_logging_log_bucket
-      log_object_prefix = "${var.storage_bucket_name}/"
+      log_bucket        = google_storage_bucket.logs[0].name
+      log_object_prefix = "cloudstorage/${var.storage_io_bucket_name}/"
     }
   }
   dynamic "encryption" {
@@ -206,7 +265,7 @@ resource "google_storage_bucket" "io" {
     }
   }
   labels = {
-    name        = var.storage_bucket_name
+    name        = var.storage_io_bucket_name
     system-name = var.system_name
     env-type    = var.env_type
   }

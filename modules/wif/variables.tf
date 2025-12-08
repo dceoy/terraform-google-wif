@@ -141,8 +141,14 @@ variable "project_iam_member_condition_description" {
   default     = null
 }
 
-variable "storage_bucket_name" {
-  description = "Name of the storage bucket to be created"
+variable "storage_io_bucket_name" {
+  description = "Name of the storage bucket for I/O operations"
+  type        = string
+  default     = null
+}
+
+variable "storage_logs_bucket_name" {
+  description = "Name of the storage bucket for logs"
   type        = string
   default     = null
 }
@@ -215,12 +221,6 @@ variable "storage_rpo" {
     condition     = var.storage_rpo == null || var.storage_rpo == "DEFAULT" || var.storage_rpo == "ASYNC_TURBO"
     error_message = "RPO must be either DEFAULT or ASYNC_TURBO."
   }
-}
-
-variable "storage_logging_log_bucket" {
-  description = "Log bucket name for access and storage logs of the storage bucket"
-  type        = string
-  default     = null
 }
 
 variable "storage_encryption_default_kms_key_name" {

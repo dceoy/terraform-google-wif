@@ -73,12 +73,22 @@ output "service_account_iam_member_etags_for_gha" {
   value       = { for k, v in google_service_account_iam_member.gha : k => v.etag }
 }
 
-output "storage_bucket_self_link" {
-  description = "URI of the cloud storage bucket"
-  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].self_link : null
+output "storage_logs_bucket_self_link" {
+  description = "URI of the cloud storage bucket for logs"
+  value       = length(google_storage_logs_bucket.io) > 0 ? google_storage_logs_bucket.io[0].self_link : null
 }
 
-output "storage_bucket_url" {
-  description = "Base URL of the cloud storage bucket"
-  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].url : null
+output "storage_logs_bucket_url" {
+  description = "Base URL of the cloud storage bucket for logs"
+  value       = length(google_storage_logs_bucket.io) > 0 ? google_storage_logs_bucket.io[0].url : null
+}
+
+output "storage_io_bucket_self_link" {
+  description = "URI of the cloud storage bucket for IO"
+  value       = length(google_storage_io_bucket.io) > 0 ? google_storage_io_bucket.io[0].self_link : null
+}
+
+output "storage_io_bucket_url" {
+  description = "Base URL of the cloud storage bucket for IO"
+  value       = length(google_storage_io_bucket.io) > 0 ? google_storage_io_bucket.io[0].url : null
 }
