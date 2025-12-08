@@ -7,7 +7,7 @@ resource "google_project_service" "apis" {
 }
 
 resource "google_iam_workload_identity_pool" "aws" {
-  count                     = local.aws_sts_role_arn != null ? 1 : 0
+  count                     = var.aws_account_id != null && var.aws_iam_role_name != null ? 1 : 0
   depends_on                = [google_project_service.apis]
   workload_identity_pool_id = "${var.system_name}-${var.env_type}-aws-wi-pool"
   display_name              = "${var.system_name}-${var.env_type}-aws-wi-pool"
@@ -24,11 +24,11 @@ resource "google_iam_workload_identity_pool_provider" "aws" {
   description                        = "OIDC provider for AWS IAM role"
   disabled                           = false
   attribute_mapping = {
-    "google.subject"       = "assertion.arn"
-    "attribute.aws_role"   = "assertion.arn.extract('assumed-role/{role}/')"
-    "attribute.account_id" = "assertion.account"
+    "google.subject"           = "assertion.arn"
+    "attribute.aws_iam_role"   = "assertion.arn.extract('assumed-role/{role}/')"
+    "attribute.aws_account_id" = "assertion.account"
   }
-  attribute_condition = "assertion.arn == '${local.aws_sts_role_arn}'"
+  attribute_condition = "attribute.aws_account_id == '${var.aws_account_id}'"
   project             = local.project_id
   aws {
     account_id = var.aws_account_id
@@ -63,7 +63,7 @@ resource "google_project_iam_member" "aws" {
 resource "google_service_account_iam_member" "aws" {
   for_each           = { for k, v in google_service_account.aws : k => v.name }
   service_account_id = each.value
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.aws[0].name}/attribute.aws_role/${var.aws_iam_role_name}"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.aws[0].name}/attribute.aws_iam_role/${var.aws_iam_role_name}"
   role               = "roles/iam.workloadIdentityUser"
   dynamic "condition" {
     for_each = var.service_account_iam_condition_expression != null && var.service_account_iam_condition_title != null ? [true] : []

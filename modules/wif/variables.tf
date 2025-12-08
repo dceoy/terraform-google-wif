@@ -158,7 +158,7 @@ variable "storage_class" {
   type        = string
   default     = null
   validation {
-    condition     = var.storage_class == null || contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_class)
+    condition     = var.storage_class == null || var.storage_class == "STANDARD" || var.storage_class == "MULTI_REGIONAL" || var.storage_class == "REGIONAL" || var.storage_class == "NEARLINE" || var.storage_class == "COLDLINE" || var.storage_class == "ARCHIVE"
     error_message = "Storage class must be one of STANDARD, MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, or ARCHIVE."
   }
 }
@@ -180,7 +180,7 @@ variable "storage_autoclass_terminal_storage_class" {
   type        = string
   default     = null
   validation {
-    condition     = var.storage_autoclass_terminal_storage_class == null || contains(["NEARLINE", "ARCHIVE"], var.storage_autoclass_terminal_storage_class)
+    condition     = var.storage_autoclass_terminal_storage_class == null || var.storage_autoclass_terminal_storage_class == "NEARLINE" || var.storage_autoclass_terminal_storage_class == "ARCHIVE"
     error_message = "Terminal storage class must be either NEARLINE or ARCHIVE."
   }
 }
@@ -212,7 +212,7 @@ variable "storage_rpo" {
   type        = string
   default     = null
   validation {
-    condition     = var.storage_rpo == null || contains(["DEFAULT", "ASYNC_TURBO"], var.storage_rpo)
+    condition     = var.storage_rpo == null || var.storage_rpo == "DEFAULT" || var.storage_rpo == "ASYNC_TURBO"
     error_message = "RPO must be either DEFAULT or ASYNC_TURBO."
   }
 }
