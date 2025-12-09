@@ -107,7 +107,6 @@ variable "project_iam_member_roles_for_aws" {
   type        = list(string)
   default = [
     "roles/aiplatform.user",
-    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
     "roles/storage.objectAdmin"
   ]
 }
