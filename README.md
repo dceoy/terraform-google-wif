@@ -65,6 +65,11 @@ Installation
     github_repository = "my-github-username/my-repo"
     project_id        = "my-gcp-project-id"
     region            = "us-central1"
+
+    # Optional: create and use a customer-managed key for bucket encryption
+    storage_kms_create                     = true
+    storage_kms_key_location               = "us"
+    storage_kms_crypto_key_rotation_period = "7776000s" # 90 days
     ```
 
 7.  Create a preview.

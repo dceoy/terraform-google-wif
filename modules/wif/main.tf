@@ -187,9 +187,9 @@ resource "google_storage_bucket" "logs" {
     }
   }
   dynamic "encryption" {
-    for_each = var.storage_encryption_default_kms_key_name != null ? [true] : []
+    for_each = local.storage_kms_default_key_name != null ? [true] : []
     content {
-      default_kms_key_name = var.storage_encryption_default_kms_key_name
+      default_kms_key_name = local.storage_kms_default_key_name
     }
   }
   dynamic "custom_placement_config" {
@@ -253,9 +253,9 @@ resource "google_storage_bucket" "io" {
     }
   }
   dynamic "encryption" {
-    for_each = var.storage_encryption_default_kms_key_name != null ? [true] : []
+    for_each = local.storage_kms_default_key_name != null ? [true] : []
     content {
-      default_kms_key_name = var.storage_encryption_default_kms_key_name
+      default_kms_key_name = local.storage_kms_default_key_name
     }
   }
   dynamic "custom_placement_config" {
@@ -269,4 +269,39 @@ resource "google_storage_bucket" "io" {
     system-name = var.system_name
     env-type    = var.env_type
   }
+}
+
+resource "google_kms_key_ring" "storage" {
+  count    = var.storage_kms_create ? 1 : 0
+  name     = local.storage_kms_key_ring_name
+  location = local.storage_kms_key_location
+  project  = local.project_id
+}
+
+resource "google_kms_crypto_key" "storage" {
+  count           = var.storage_kms_create ? 1 : 0
+  name            = local.storage_kms_crypto_key_name
+  key_ring        = google_kms_key_ring.storage[0].id
+  purpose         = "ENCRYPT_DECRYPT"
+  rotation_period = var.storage_kms_crypto_key_rotation_period
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "storage_sa" {
+  for_each = var.storage_kms_create ? merge(
+    { for k, v in google_service_account.aws : "aws-${k}" => v.email },
+    { for k, v in google_service_account.gha : "gha-${k}" => v.email }
+  ) : {}
+  crypto_key_id = google_kms_crypto_key.storage[0].id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${each.value}"
+}
+
+resource "google_kms_crypto_key_iam_member" "storage_gcs" {
+  count         = var.storage_kms_create ? 1 : 0
+  crypto_key_id = google_kms_crypto_key.storage[0].id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${local.storage_service_account}"
 }

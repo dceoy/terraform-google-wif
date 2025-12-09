@@ -54,6 +54,7 @@ variable "enabled_apis" {
   description = "List of Google APIs that need to be enabled before creating Workload Identity Federation resources"
   type        = list(string)
   default = [
+    "cloudkms.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
@@ -227,6 +228,40 @@ variable "storage_encryption_default_kms_key_name" {
   description = "ID of a Cloud KMS key that will be used to encrypt objects inserted into the storage bucket"
   type        = string
   default     = null
+}
+
+variable "storage_kms_create" {
+  description = "Whether to create a customer-managed KMS key for storage bucket encryption"
+  type        = bool
+  default     = false
+}
+
+variable "storage_kms_key_ring_name" {
+  description = "Name of the KMS key ring to create/use for storage bucket encryption"
+  type        = string
+  default     = null
+}
+
+variable "storage_kms_crypto_key_name" {
+  description = "Name of the KMS crypto key to create/use for storage bucket encryption"
+  type        = string
+  default     = null
+}
+
+variable "storage_kms_key_location" {
+  description = "Location of the KMS key ring for storage bucket encryption"
+  type        = string
+  default     = null
+}
+
+variable "storage_kms_crypto_key_rotation_period" {
+  description = "Rotation period for the KMS crypto key (e.g., '7776000s' for 90 days); set null to disable auto-rotation"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_kms_crypto_key_rotation_period == null || can(regex("^[0-9]+s$", var.storage_kms_crypto_key_rotation_period))
+    error_message = "Rotation period must be a duration string in seconds, e.g., '7776000s'."
+  }
 }
 
 variable "storage_custom_placement_config_data_locations" {
