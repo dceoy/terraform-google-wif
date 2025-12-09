@@ -279,11 +279,24 @@ resource "google_kms_key_ring" "storage" {
 }
 
 resource "google_kms_crypto_key" "storage" {
-  count           = var.storage_kms_create ? 1 : 0
-  name            = local.storage_kms_crypto_key_name
-  key_ring        = google_kms_key_ring.storage[0].id
-  purpose         = "ENCRYPT_DECRYPT"
-  rotation_period = var.storage_kms_crypto_key_rotation_period
+  count                         = var.storage_kms_create ? 1 : 0
+  name                          = local.storage_kms_crypto_key_name
+  key_ring                      = google_kms_key_ring.storage[0].id
+  purpose                       = var.storage_kms_purpose
+  import_only                   = var.storage_kms_import_only
+  rotation_period               = var.storage_kms_crypto_key_rotation_period
+  destroy_scheduled_duration    = var.storage_kms_destroy_scheduled_duration
+  skip_initial_version_creation = var.storage_kms_skip_initial_version_creation
+  labels                        = var.storage_kms_labels
+
+  dynamic "version_template" {
+    for_each = var.storage_kms_version_algorithm != null || var.storage_kms_version_protection_level != null ? [true] : []
+    content {
+      algorithm        = coalesce(var.storage_kms_version_algorithm, "GOOGLE_SYMMETRIC_ENCRYPTION")
+      protection_level = var.storage_kms_version_protection_level
+    }
+  }
+
   lifecycle {
     prevent_destroy = true
   }

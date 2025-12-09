@@ -264,6 +264,52 @@ variable "storage_kms_crypto_key_rotation_period" {
   }
 }
 
+variable "storage_kms_purpose" {
+  description = "Purpose of the KMS key used for storage bucket encryption"
+  type        = string
+  default     = "ENCRYPT_DECRYPT"
+}
+
+variable "storage_kms_destroy_scheduled_duration" {
+  description = "Soft-delete retention for the KMS key (e.g., '86400s'); omit to use provider default"
+  type        = string
+  default     = null
+}
+
+variable "storage_kms_skip_initial_version_creation" {
+  description = "Create the KMS key without an initial version (requires later import or creation of a version)"
+  type        = bool
+  default     = false
+}
+
+variable "storage_kms_labels" {
+  description = "Labels to apply to the KMS crypto key"
+  type        = map(string)
+  default     = {}
+}
+
+variable "storage_kms_version_algorithm" {
+  description = "Algorithm for new crypto key versions (e.g., 'GOOGLE_SYMMETRIC_ENCRYPTION')"
+  type        = string
+  default     = null
+}
+
+variable "storage_kms_version_protection_level" {
+  description = "Protection level for new crypto key versions (SOFTWARE or HSM)"
+  type        = string
+  default     = "SOFTWARE"
+  validation {
+    condition     = var.storage_kms_version_protection_level == null || var.storage_kms_version_protection_level == "SOFTWARE" || var.storage_kms_version_protection_level == "HSM"
+    error_message = "Protection level must be SOFTWARE or HSM."
+  }
+}
+
+variable "storage_kms_import_only" {
+  description = "Whether the KMS key is import-only (no versions created by Google)"
+  type        = bool
+  default     = false
+}
+
 variable "storage_custom_placement_config_data_locations" {
   description = "List of individual regions that comprise a dual-region storage bucket"
   type        = list(string)
