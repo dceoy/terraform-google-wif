@@ -2,27 +2,39 @@
 
 ## Project Structure & Module Organization
 
-Terraform modules live under `modules/<module-name>`; keep each module self-contained with its own `main.tf`, `variables.tf`, `outputs.tf`, and `README.md`. End-to-end integration samples belong in `examples/`, mirroring real workloads to validate Workload Identity Federation (WIF) setups. Store reusable Terratest helpers and fixtures in `test/` to keep module directories Terraform-only. Automation and release workflows reside in `.github/workflows`, so update YAML there when pipelines need new checks.
+- `modules/wif/`: Terraform module for Google Cloud Workload Identity Federation (AWS IAM + GitHub Actions OIDC). Key files: `main.tf` (resources), `variables.tf` (inputs/validation), `outputs.tf`, `provider.tf`, `version.tf`.
+- `.github/workflows/ci.yml`: Reusable CI jobs that run Terraform lint/scan and handle dependency PRs (Dependabot/Renovate) against `modules/wif`.
+- `README.md`: Setup walkthrough (env vars, `gcloud infra-manager` previews/deployments). Create your own `envs/<env>/terraform.tfvars` locally; the directory is intentionally untracked.
 
 ## Build, Test, and Development Commands
 
-Run `terraform fmt -recursive` before every commit to keep HCL formatting consistent. Use `terraform validate modules/<module-name>` to catch schema or reference issues early. Run `terraform plan -var-file=env/dev.tfvars` from the relevant example to confirm behavioral changes. Execute `go test ./test/...` to run Terratest suites; set `TF_VAR_project_id` and other Google Cloud settings via your environment before invoking the tests.
+- `terraform fmt -recursive`: Standardize HCL formatting (CI enforces). Run at repo root.
+- `terraform init` then `terraform validate` inside `modules/wif/`: Prep providers/backends and verify syntax before planning.
+- `terraform plan -var-file=envs/<env>/terraform.tfvars -out plan.tfplan`: Produce a plan; keep var files outside version control.
+- `terraform apply plan.tfplan`: Apply the reviewed plan.
+- CI mirror: `CI/CD` workflow runs lint-and-scan via shared actions (fmt, validate, static analysis) and manages lock-file upgrades for bot PRs.
 
 ## Coding Style & Naming Conventions
 
-Follow Terraform's two-space indentation and sorted block attribute style enforced by `terraform fmt`. Name resources with concise snake_case (`google_iam_workload_identity_pool.pool`) and align module outputs with the Google Cloud concept they expose. Keep variables lower_snake_case with descriptive names such as `provider_sa_email`. Default values should stay in `variables.tf`, and avoid hard-coding project IDs inside modules.
+- HCL style: 2-space indents, block arguments aligned by key, lists trailing commas optional but keep one item per line for clarity.
+- Inputs/locals in `snake_case`; resource IDs use interpolated kebab-case patterns such as `${var.system_name}-${var.env_type}-wif-...` to keep names deterministic across clouds.
+- Keep variable validations in `variables.tf` and defaults minimal; add comments only where intent is non-obvious.
 
 ## Testing Guidelines
 
-Add Terratest cases for every new module path under `test/`, mirroring the example name (`TestPoolWorkload` for `examples/pool`). Prefer table-driven tests when checking multiple parameter combinations. Provide fixture-specific cleanup to delete pools and providers after assertions complete. Record test evidence in the PR by pasting the `go test` summary and `terraform plan` diff for the examples that changed.
+- Minimum local checks before PR: `terraform fmt -recursive`, `terraform validate`, and a `terraform plan` against a sample `envs/<env>/terraform.tfvars` matching the change scope (AWS, GitHub, or storage).
+- When altering IAM conditions or bucket policies, verify expected attributes appear in the plan (e.g., `attribute.aws_iam_role`, `retention_policy`). Include notable diff snippets in the PR description.
 
 ## Commit & Pull Request Guidelines
 
-Write commit subjects in the imperative mood with an optional scope, e.g. `module(pool): add oidc provider output`. Group related Terraform and Terratest changes in the same commit to keep history reviewable. Pull requests should describe the motivation, link any tracking issue, and list affected modules or examples. Always attach the latest `terraform plan` output and `go test` results in the PR description. Request at least one review from a maintainer familiar with Google Cloud IAM before merging.
+- Commits: short, imperative subjects; optional scope like `module(wif): ...`; reference issue/PR when applicable (e.g., `(#10)`). Keep logically separate changes in separate commits.
+- PRs: explain intent and impact, link related issues, and paste outputs for `terraform validate` and the latest `plan`. Note any manual steps (API enablement, service account creation) required for reviewers.
+- CI must be green. Bot PRs (Dependabot/Renovate) auto-upgrade lock files; avoid rebasing them unless necessary.
 
 ## Security & Configuration Tips
 
-Never commit service account keys or JSON credentials; rely on ADC or Vault-backed providers instead. When updating examples, scope identities to minimal roles and document required IAM bindings. Review `.github/workflows` for secrets usage whenever changing test or release automation to avoid leaking sensitive values.
+- Do not commit credentials or `terraform.tfvars`; use environment variables or a secure secrets manager.
+- Enable required Google APIs and least-privilege service accounts as shown in `README.md`. Keep bucket policies restrictive (`uniform_bucket_level_access = true`, public access prevention enforced).
 
 ## Serena MCP Usage (Prioritize When Available)
 
