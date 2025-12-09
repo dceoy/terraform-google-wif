@@ -1,19 +1,8 @@
 data "google_client_config" "current" {}
-data "google_project" "current" {
-  project_id = local.project_id
-}
 
 locals {
-  project_id = var.project_id != null ? var.project_id : data.google_client_config.current.project
-  region     = var.region != null ? var.region : data.google_client_config.current.region
-
-  kms_key_ring_name   = coalesce(var.kms_key_ring_name, "${var.system_name}-${var.env_type}-storage-kr")
-  kms_crypto_key_name = coalesce(var.kms_crypto_key_name, "${var.system_name}-${var.env_type}-storage-ck")
-  kms_key_location    = coalesce(var.kms_key_location, local.region)
-
-  kms_default_key_name = var.storage_encryption_default_kms_key_name != null ? var.storage_encryption_default_kms_key_name : (
-    var.kms_create ? google_kms_crypto_key.storage[0].id : null
-  )
-
-  storage_service_account = "service-${data.google_project.current.number}@gs-project-accounts.iam.gserviceaccount.com"
+  project_id               = var.project_id != null ? var.project_id : data.google_client_config.current.project
+  region                   = var.region != null ? var.region : data.google_client_config.current.region
+  storage_io_bucket_name   = var.create_storage_io_bucket ? "${var.system_name}-${var.env_type}-io-${local.region}-${local.project_id}" : null
+  storage_logs_bucket_name = var.create_storage_logs_bucket && var.storage_logging_log_bucket == null ? "${var.system_name}-${var.env_type}-logs-${local.region}-${local.project_id}" : null
 }

@@ -73,37 +73,32 @@ output "service_account_iam_member_etags_for_gha" {
   value       = { for k, v in google_service_account_iam_member.gha : k => v.etag }
 }
 
+output "kms_key_ring_id" {
+  description = "KMS key ring ID"
+  value       = length(google_kms_key_ring.main) > 0 ? google_kms_key_ring.main[0].id : null
+}
+
+output "kms_crypto_key_id" {
+  description = "KMS crypto key ID"
+  value       = length(google_kms_crypto_key.main) > 0 ? google_kms_crypto_key.main[0].id : null
+}
+
 output "storage_logs_bucket_self_link" {
   description = "URI of the cloud storage bucket for logs"
-  value       = length(google_storage_logs_bucket.io) > 0 ? google_storage_logs_bucket.io[0].self_link : null
+  value       = length(google_storage_bucket.logs) > 0 ? google_storage_bucket.logs[0].self_link : null
 }
 
 output "storage_logs_bucket_url" {
   description = "Base URL of the cloud storage bucket for logs"
-  value       = length(google_storage_logs_bucket.io) > 0 ? google_storage_logs_bucket.io[0].url : null
+  value       = length(google_storage_bucket.logs) > 0 ? google_storage_bucket.logs[0].url : null
 }
 
 output "storage_io_bucket_self_link" {
   description = "URI of the cloud storage bucket for IO"
-  value       = length(google_storage_io_bucket.io) > 0 ? google_storage_io_bucket.io[0].self_link : null
+  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].self_link : null
 }
 
 output "storage_io_bucket_url" {
   description = "Base URL of the cloud storage bucket for IO"
-  value       = length(google_storage_io_bucket.io) > 0 ? google_storage_io_bucket.io[0].url : null
-}
-
-output "kms_key_ring_id" {
-  description = "Resource ID of the KMS key ring used for storage bucket encryption when created by the module"
-  value       = length(google_kms_key_ring.storage) > 0 ? google_kms_key_ring.storage[0].id : null
-}
-
-output "kms_crypto_key_id" {
-  description = "Resource ID of the KMS crypto key used for storage bucket encryption when created by the module"
-  value       = length(google_kms_crypto_key.storage) > 0 ? google_kms_crypto_key.storage[0].id : null
-}
-
-output "kms_default_key_name" {
-  description = "KMS key resource name applied as the default encryption key for storage buckets"
-  value       = local.kms_default_key_name
+  value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].url : null
 }
