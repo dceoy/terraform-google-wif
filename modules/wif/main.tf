@@ -171,7 +171,7 @@ resource "google_kms_crypto_key" "main" {
     }
   }
   labels = {
-    name        = "${var.system_name}-${var.env_type}-kms-storage-crypto-key"
+    name        = "${var.system_name}-${var.env_type}-kms-crypto-key"
     system-name = var.system_name
     env-type    = var.env_type
   }
