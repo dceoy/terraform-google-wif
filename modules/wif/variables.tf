@@ -230,81 +230,81 @@ variable "storage_encryption_default_kms_key_name" {
   default     = null
 }
 
-variable "storage_kms_create" {
+variable "kms_create" {
   description = "Whether to create a customer-managed KMS key for storage bucket encryption"
   type        = bool
   default     = false
 }
 
-variable "storage_kms_key_ring_name" {
+variable "kms_key_ring_name" {
   description = "Name of the KMS key ring to create/use for storage bucket encryption"
   type        = string
   default     = null
 }
 
-variable "storage_kms_crypto_key_name" {
+variable "kms_crypto_key_name" {
   description = "Name of the KMS crypto key to create/use for storage bucket encryption"
   type        = string
   default     = null
 }
 
-variable "storage_kms_key_location" {
+variable "kms_key_location" {
   description = "Location of the KMS key ring for storage bucket encryption"
   type        = string
   default     = null
 }
 
-variable "storage_kms_crypto_key_rotation_period" {
+variable "kms_crypto_key_rotation_period" {
   description = "Rotation period for the KMS crypto key (e.g., '7776000s' for 90 days); set null to disable auto-rotation"
   type        = string
   default     = null
   validation {
-    condition     = var.storage_kms_crypto_key_rotation_period == null || can(regex("^[0-9]+s$", var.storage_kms_crypto_key_rotation_period))
+    condition     = var.kms_crypto_key_rotation_period == null || can(regex("^[0-9]+s$", var.kms_crypto_key_rotation_period))
     error_message = "Rotation period must be a duration string in seconds, e.g., '7776000s'."
   }
 }
 
-variable "storage_kms_purpose" {
+variable "kms_purpose" {
   description = "Purpose of the KMS key used for storage bucket encryption"
   type        = string
   default     = "ENCRYPT_DECRYPT"
 }
 
-variable "storage_kms_destroy_scheduled_duration" {
+variable "kms_destroy_scheduled_duration" {
   description = "Soft-delete retention for the KMS key (e.g., '86400s'); omit to use provider default"
   type        = string
   default     = null
 }
 
-variable "storage_kms_skip_initial_version_creation" {
+variable "kms_skip_initial_version_creation" {
   description = "Create the KMS key without an initial version (requires later import or creation of a version)"
   type        = bool
   default     = false
 }
 
-variable "storage_kms_labels" {
+variable "kms_labels" {
   description = "Labels to apply to the KMS crypto key"
   type        = map(string)
   default     = {}
 }
 
-variable "storage_kms_version_algorithm" {
+variable "kms_version_algorithm" {
   description = "Algorithm for new crypto key versions (e.g., 'GOOGLE_SYMMETRIC_ENCRYPTION')"
   type        = string
   default     = null
 }
 
-variable "storage_kms_version_protection_level" {
+variable "kms_version_protection_level" {
   description = "Protection level for new crypto key versions (SOFTWARE or HSM)"
   type        = string
   default     = "SOFTWARE"
   validation {
-    condition     = var.storage_kms_version_protection_level == null || var.storage_kms_version_protection_level == "SOFTWARE" || var.storage_kms_version_protection_level == "HSM"
+    condition     = var.kms_version_protection_level == null || var.kms_version_protection_level == "SOFTWARE" || var.kms_version_protection_level == "HSM"
     error_message = "Protection level must be SOFTWARE or HSM."
   }
 }
 
-variable "storage_kms_import_only" {
+variable "kms_import_only" {
   description = "Whether the KMS key is import-only (no versions created by Google)"
   type        = bool
   default     = false

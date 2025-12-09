@@ -93,17 +93,17 @@ output "storage_io_bucket_url" {
   value       = length(google_storage_io_bucket.io) > 0 ? google_storage_io_bucket.io[0].url : null
 }
 
-output "storage_kms_key_ring_id" {
+output "kms_key_ring_id" {
   description = "Resource ID of the KMS key ring used for storage bucket encryption when created by the module"
   value       = length(google_kms_key_ring.storage) > 0 ? google_kms_key_ring.storage[0].id : null
 }
 
-output "storage_kms_crypto_key_id" {
+output "kms_crypto_key_id" {
   description = "Resource ID of the KMS crypto key used for storage bucket encryption when created by the module"
   value       = length(google_kms_crypto_key.storage) > 0 ? google_kms_crypto_key.storage[0].id : null
 }
 
-output "storage_default_kms_key_name" {
+output "kms_default_key_name" {
   description = "KMS key resource name applied as the default encryption key for storage buckets"
-  value       = local.storage_kms_default_key_name
+  value       = local.kms_default_key_name
 }

@@ -187,9 +187,9 @@ resource "google_storage_bucket" "logs" {
     }
   }
   dynamic "encryption" {
-    for_each = local.storage_kms_default_key_name != null ? [true] : []
+    for_each = local.kms_default_key_name != null ? [true] : []
     content {
-      default_kms_key_name = local.storage_kms_default_key_name
+      default_kms_key_name = local.kms_default_key_name
     }
   }
   dynamic "custom_placement_config" {
@@ -253,9 +253,9 @@ resource "google_storage_bucket" "io" {
     }
   }
   dynamic "encryption" {
-    for_each = local.storage_kms_default_key_name != null ? [true] : []
+    for_each = local.kms_default_key_name != null ? [true] : []
     content {
-      default_kms_key_name = local.storage_kms_default_key_name
+      default_kms_key_name = local.kms_default_key_name
     }
   }
   dynamic "custom_placement_config" {
@@ -272,28 +272,28 @@ resource "google_storage_bucket" "io" {
 }
 
 resource "google_kms_key_ring" "storage" {
-  count    = var.storage_kms_create ? 1 : 0
-  name     = local.storage_kms_key_ring_name
-  location = local.storage_kms_key_location
+  count    = var.kms_create ? 1 : 0
+  name     = local.kms_key_ring_name
+  location = local.kms_key_location
   project  = local.project_id
 }
 
 resource "google_kms_crypto_key" "storage" {
-  count                         = var.storage_kms_create ? 1 : 0
-  name                          = local.storage_kms_crypto_key_name
+  count                         = var.kms_create ? 1 : 0
+  name                          = local.kms_crypto_key_name
   key_ring                      = google_kms_key_ring.storage[0].id
-  purpose                       = var.storage_kms_purpose
-  import_only                   = var.storage_kms_import_only
-  rotation_period               = var.storage_kms_crypto_key_rotation_period
-  destroy_scheduled_duration    = var.storage_kms_destroy_scheduled_duration
-  skip_initial_version_creation = var.storage_kms_skip_initial_version_creation
-  labels                        = var.storage_kms_labels
+  purpose                       = var.kms_purpose
+  import_only                   = var.kms_import_only
+  rotation_period               = var.kms_crypto_key_rotation_period
+  destroy_scheduled_duration    = var.kms_destroy_scheduled_duration
+  skip_initial_version_creation = var.kms_skip_initial_version_creation
+  labels                        = var.kms_labels
 
   dynamic "version_template" {
-    for_each = var.storage_kms_version_algorithm != null || var.storage_kms_version_protection_level != null ? [true] : []
+    for_each = var.kms_version_algorithm != null || var.kms_version_protection_level != null ? [true] : []
     content {
-      algorithm        = coalesce(var.storage_kms_version_algorithm, "GOOGLE_SYMMETRIC_ENCRYPTION")
-      protection_level = var.storage_kms_version_protection_level
+      algorithm        = coalesce(var.kms_version_algorithm, "GOOGLE_SYMMETRIC_ENCRYPTION")
+      protection_level = var.kms_version_protection_level
     }
   }
 
@@ -303,7 +303,7 @@ resource "google_kms_crypto_key" "storage" {
 }
 
 resource "google_kms_crypto_key_iam_member" "storage_sa" {
-  for_each = var.storage_kms_create ? merge(
+  for_each = var.kms_create ? merge(
     { for k, v in google_service_account.aws : "aws-${k}" => v.email },
     { for k, v in google_service_account.gha : "gha-${k}" => v.email }
   ) : {}
@@ -313,7 +313,7 @@ resource "google_kms_crypto_key_iam_member" "storage_sa" {
 }
 
 resource "google_kms_crypto_key_iam_member" "storage_gcs" {
-  count         = var.storage_kms_create ? 1 : 0
+  count         = var.kms_create ? 1 : 0
   crypto_key_id = google_kms_crypto_key.storage[0].id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${local.storage_service_account}"
