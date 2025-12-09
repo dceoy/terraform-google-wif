@@ -54,6 +54,7 @@ variable "enabled_apis" {
   description = "List of Google APIs that need to be enabled before creating Workload Identity Federation resources"
   type        = list(string)
   default = [
+    "cloudkms.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
@@ -115,6 +116,7 @@ variable "project_iam_member_roles_for_gha" {
   type        = list(string)
   default = [
     "roles/config.admin",
+    "roles/cloudkms.admin",
     "roles/storage.admin",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/iam.workloadIdentityPoolAdmin",
@@ -141,10 +143,72 @@ variable "project_iam_member_condition_description" {
   default     = null
 }
 
-variable "storage_bucket_name" {
-  description = "Name of the storage bucket to be created"
+variable "create_kms_crypto_key" {
+  description = "Whether to create a KMS crypto key for storage bucket encryption"
+  type        = bool
+  default     = false
+}
+
+variable "create_storage_io_bucket" {
+  description = "Whether to create a storage bucket for I/O operations"
+  type        = bool
+  default     = false
+}
+
+variable "create_storage_logs_bucket" {
+  description = "Whether to create a storage bucket for logs if storage_logging_log_bucket is not provided"
+  type        = bool
+  default     = false
+}
+
+variable "kms_purpose" {
+  description = "Immutable purpose of the KMS crypto key"
+  type        = string
+  default     = "ENCRYPT_DECRYPT"
+}
+
+variable "kms_rotation_period" {
+  description = "Rotation period for the KMS crypto key"
   type        = string
   default     = null
+  validation {
+    condition     = var.kms_rotation_period == null || can(regex("^[0-9]+(\\.[0-9]{1,9})?s$", var.kms_rotation_period))
+    error_message = "Rotation period must be in the format of a decimal number with up to 9 fractional digits, followed by the letter s (seconds)."
+  }
+}
+
+variable "kms_destroy_scheduled_duration" {
+  description = "Period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED (if not specified, the default duration is 30 days)"
+  type        = string
+  default     = null
+}
+
+variable "kms_import_only" {
+  description = "Whether to contain only imported versions of the KMS crypto key"
+  type        = bool
+  default     = false
+}
+
+variable "kms_skip_initial_version_creation" {
+  description = "Whether to create a KMS crypto key without any crypto key versions"
+  type        = bool
+  default     = false
+}
+
+variable "kms_version_template_algorithm" {
+  description = "Algorithm to use when creating a version based on the template for the KMS crypto key"
+  type        = string
+  default     = null
+}
+
+variable "kms_version_template_protection_level" {
+  description = "Protection level to use when creating a version based on the template for the KMS crypto key"
+  type        = string
+  default     = "SOFTWARE"
+  validation {
+    condition     = contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], var.kms_version_template_protection_level)
+    error_message = "Protection level must be SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC."
+  }
 }
 
 variable "force_destroy" {
@@ -201,6 +265,12 @@ variable "storage_retention_policy_retention_period" {
   }
 }
 
+variable "storage_logging_log_bucket" {
+  description = "Log bucket for access and storage logs on the storage bucket"
+  type        = string
+  default     = null
+}
+
 variable "storage_requester_pays" {
   description = "Whether to enable requester pays on the storage bucket"
   type        = bool
@@ -215,12 +285,6 @@ variable "storage_rpo" {
     condition     = var.storage_rpo == null || var.storage_rpo == "DEFAULT" || var.storage_rpo == "ASYNC_TURBO"
     error_message = "RPO must be either DEFAULT or ASYNC_TURBO."
   }
-}
-
-variable "storage_logging_log_bucket" {
-  description = "Log bucket name for access and storage logs of the storage bucket"
-  type        = string
-  default     = null
 }
 
 variable "storage_encryption_default_kms_key_name" {
