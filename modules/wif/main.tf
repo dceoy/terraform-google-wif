@@ -47,7 +47,7 @@ resource "google_service_account" "aws" {
 
 resource "google_project_iam_member" "aws" {
   for_each = toset(length(google_service_account.aws) > 0 ? var.project_iam_member_roles_for_aws : [])
-  member   = "serviceAccount:${google_service_account.aws[0].email}"
+  member   = google_service_account.aws[0].member
   role     = each.value
   project  = local.project_id
   dynamic "condition" {
@@ -118,7 +118,7 @@ resource "google_service_account" "gha" {
 
 resource "google_project_iam_member" "gha" {
   for_each = toset(length(google_service_account.gha) > 0 ? var.project_iam_member_roles_for_gha : [])
-  member   = "serviceAccount:${google_service_account.gha[0].email}"
+  member   = google_service_account.gha[0].member
   role     = each.value
   project  = local.project_id
   dynamic "condition" {
@@ -180,20 +180,27 @@ resource "google_kms_crypto_key" "main" {
 resource "google_kms_crypto_key_iam_member" "aws" {
   count         = length(google_kms_crypto_key.main) > 0 && length(google_service_account.aws) > 0 ? 1 : 0
   crypto_key_id = google_kms_crypto_key.main[0].id
-  member        = "serviceAccount:${google_service_account.aws[0].email}"
+  member        = google_service_account.aws[0].member
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
 resource "google_kms_crypto_key_iam_member" "gha" {
   count         = length(google_kms_crypto_key.main) > 0 && length(google_service_account.gha) > 0 ? 1 : 0
   crypto_key_id = google_kms_crypto_key.main[0].id
-  member        = "serviceAccount:${google_service_account.gha[0].email}"
+  member        = google_service_account.gha[0].member
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+}
+
+resource "google_kms_crypto_key_iam_member" "storage" {
+  count         = length(google_kms_crypto_key.main) > 0 ? 1 : 0
+  crypto_key_id = google_kms_crypto_key.main[0].id
+  member        = local.storage_project_sa_member
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
 
 # trivy:ignore:AVD-GCP-0066
 resource "google_storage_bucket" "logs" {
-  depends_on                  = [google_project_service.apis]
+  depends_on                  = [google_project_service.apis, google_kms_crypto_key_iam_member.storage]
   count                       = local.storage_logs_bucket_name != null ? 1 : 0
   name                        = local.storage_logs_bucket_name
   project                     = local.project_id
@@ -235,7 +242,7 @@ resource "google_storage_bucket" "logs" {
   dynamic "encryption" {
     for_each = var.storage_encryption_default_kms_key_name != null || length(google_kms_crypto_key.main) > 0 ? [true] : []
     content {
-      default_kms_key_name = var.storage_encryption_default_kms_key_name != null ? var.storage_encryption_default_kms_key_name : google_kms_crypto_key.main[0].self_link
+      default_kms_key_name = var.storage_encryption_default_kms_key_name != null ? var.storage_encryption_default_kms_key_name : google_kms_crypto_key.main[0].id
     }
   }
   dynamic "custom_placement_config" {
@@ -253,7 +260,7 @@ resource "google_storage_bucket" "logs" {
 
 # trivy:ignore:AVD-GCP-0066
 resource "google_storage_bucket" "io" {
-  depends_on                  = [google_project_service.apis]
+  depends_on                  = [google_project_service.apis, google_kms_crypto_key_iam_member.storage]
   count                       = local.storage_io_bucket_name != null ? 1 : 0
   name                        = local.storage_io_bucket_name
   project                     = local.project_id
@@ -302,7 +309,7 @@ resource "google_storage_bucket" "io" {
   dynamic "encryption" {
     for_each = var.storage_encryption_default_kms_key_name != null || length(google_kms_crypto_key.main) > 0 ? [true] : []
     content {
-      default_kms_key_name = var.storage_encryption_default_kms_key_name != null ? var.storage_encryption_default_kms_key_name : google_kms_crypto_key.main[0].self_link
+      default_kms_key_name = var.storage_encryption_default_kms_key_name != null ? var.storage_encryption_default_kms_key_name : google_kms_crypto_key.main[0].id
     }
   }
   dynamic "custom_placement_config" {
