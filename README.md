@@ -53,6 +53,9 @@ Installation
     $ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
         --member="serviceAccount:${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com" \
         --role='roles/logging.admin'
+    $ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+        --member="serviceAccount:${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com" \
+        --role='roles/cloudkms.admin'
     ```
 
 6.  Create `envs/dev/terraform.tfvars` and set the variables as follows:

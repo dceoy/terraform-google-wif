@@ -13,7 +13,7 @@ variable "aws_account_id" {
   type        = string
   default     = null
   validation {
-    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    condition     = var.aws_account_id == null || can(regex("^[0-9]{12}$", var.aws_account_id))
     error_message = "AWS account ID must be a 12-digit numeric string."
   }
 }
@@ -23,7 +23,7 @@ variable "aws_iam_role_name" {
   type        = string
   default     = null
   validation {
-    condition     = can(regex("^[\\w+=,.@-]+(?:/[\\w+=,.@-]+)*$", var.aws_iam_role_name))
+    condition     = var.aws_iam_role_name == null || can(regex("^[\\w+=,.@-]+(?:/[\\w+=,.@-]+)*$", var.aws_iam_role_name))
     error_message = "AWS IAM role name may contain letters, numbers, and the characters +=,.@- with optional path segments separated by '/'."
   }
 }
@@ -33,7 +33,7 @@ variable "github_repository" {
   type        = string
   default     = null
   validation {
-    condition     = can(regex("^[^/]+/[^/]+$", var.github_repository))
+    condition     = var.github_repository == null || can(regex("^[^/]+/[^/]+$", var.github_repository))
     error_message = "GitHub repository must be in the format 'owner/repo'."
   }
 }
