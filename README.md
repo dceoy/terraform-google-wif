@@ -1,12 +1,10 @@
-terraform-google-wif
-====================
+# terraform-google-wif
 
 Terraform modules of Google Cloud Workload Identity Federation for AWS and GitHub Actions.
 
 [![CI](https://github.com/dceoy/terraform-google-wif/actions/workflows/ci.yml/badge.svg)](https://github.com/dceoy/terraform-google-wif/actions/workflows/ci.yml)
 
-Installation
-------------
+## Installation
 
 1.  Check out the repository.
 
@@ -99,8 +97,7 @@ Installation
         "projects/${PROJECT_ID}/locations/${LOCATION}/deployments/${DEPLOYMENT_ID}"
     ```
 
-Cleanup
--------
+## Cleanup
 
 ```sh
 $ PROJECT_ID='my-gcp-project-id'

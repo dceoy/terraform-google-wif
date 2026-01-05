@@ -120,7 +120,7 @@ variable "project_iam_member_roles_for_gha" {
     "roles/storage.admin",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/iam.workloadIdentityPoolAdmin",
-    "roles/iam.serviceAccountAdmin",
+    "roles/iam.serviceAccountUser",
     "roles/resourcemanager.projectIamAdmin"
   ]
 }
