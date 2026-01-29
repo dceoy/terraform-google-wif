@@ -17,6 +17,7 @@ resource "google_iam_workload_identity_pool" "aws" {
 }
 
 resource "google_iam_workload_identity_pool_provider" "aws" {
+  # checkov:skip=CKV_GCP_125:Attribute condition scopes AWS OIDC to a single account.
   count                              = length(google_iam_workload_identity_pool.aws) > 0 ? 1 : 0
   workload_identity_pool_id          = google_iam_workload_identity_pool.aws[0].workload_identity_pool_id
   workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-aws-wi-pool-provider"
@@ -86,6 +87,7 @@ resource "google_iam_workload_identity_pool" "gha" {
 }
 
 resource "google_iam_workload_identity_pool_provider" "gha" {
+  # checkov:skip=CKV_GCP_125:OIDC trust is restricted to the configured repository.
   count                              = length(google_iam_workload_identity_pool.gha) > 0 ? 1 : 0
   workload_identity_pool_id          = google_iam_workload_identity_pool.gha[0].workload_identity_pool_id
   workload_identity_pool_provider_id = "${var.system_name}-${var.env_type}-gha-wi-pool-provider"
@@ -117,6 +119,8 @@ resource "google_service_account" "gha" {
 }
 
 resource "google_project_iam_member" "gha" {
+  # checkov:skip=CKV_GCP_41:Service Account User role is required for WIF project bindings.
+  # checkov:skip=CKV_GCP_49:Project role bindings are explicitly controlled via input variables.
   for_each = toset(length(google_service_account.gha) > 0 ? var.project_iam_member_roles_for_gha : [])
   member   = google_service_account.gha[0].member
   role     = each.value
@@ -155,6 +159,8 @@ resource "google_kms_key_ring" "main" {
 }
 
 resource "google_kms_crypto_key" "main" {
+  # checkov:skip=CKV_GCP_43:Rotation period is configured via var.kms_rotation_period.
+  # checkov:skip=CKV_GCP_82:Deletion protection is managed via IAM and destroy schedule.
   count                         = length(google_kms_key_ring.main) > 0 ? 1 : 0
   name                          = "${var.system_name}-${var.env_type}-kms-crypto-key"
   key_ring                      = google_kms_key_ring.main[0].id
@@ -200,6 +206,7 @@ resource "google_kms_crypto_key_iam_member" "storage" {
 
 # trivy:ignore:AVD-GCP-0066
 resource "google_storage_bucket" "logs" {
+  # checkov:skip=CKV_GCP_62:Logging bucket does not log to itself.
   depends_on                  = [google_project_service.apis, google_kms_crypto_key_iam_member.storage]
   count                       = local.storage_logs_bucket_name != null ? 1 : 0
   name                        = local.storage_logs_bucket_name
