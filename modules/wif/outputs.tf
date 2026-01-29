@@ -18,6 +18,11 @@ output "service_account_name_for_aws" {
   value       = length(google_service_account.aws) > 0 ? google_service_account.aws[0].name : null
 }
 
+output "service_account_email_for_aws" {
+  description = "Email of the WIF service account for AWS"
+  value       = length(google_service_account.aws) > 0 ? google_service_account.aws[0].email : null
+}
+
 output "service_account_member_for_aws" {
   description = "Member of the WIF service account for AWS"
   value       = length(google_service_account.aws) > 0 ? google_service_account.aws[0].member : null
@@ -51,6 +56,11 @@ output "workload_identity_pool_provider_name_for_gha" {
 output "service_account_name_for_gha" {
   description = "Full name of the WIF service account resource for GitHub Actions"
   value       = length(google_service_account.gha) > 0 ? google_service_account.gha[0].name : null
+}
+
+output "service_account_email_for_gha" {
+  description = "Email of the WIF service account for GitHub Actions"
+  value       = length(google_service_account.gha) > 0 ? google_service_account.gha[0].email : null
 }
 
 output "service_account_member_for_gha" {
