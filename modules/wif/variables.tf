@@ -62,7 +62,9 @@ variable "enabled_apis" {
     "storage.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
-    "aiplatform.googleapis.com"
+    "aiplatform.googleapis.com",
+    "drive.googleapis.com",
+    "sheets.googleapis.com"
   ]
 }
 
@@ -107,7 +109,8 @@ variable "project_iam_member_roles_for_aws" {
   type        = list(string)
   default = [
     "roles/aiplatform.user",
-    "roles/storage.objectAdmin"
+    "roles/storage.objectAdmin",
+    "roles/drive.file"
   ]
 }
 
