@@ -150,6 +150,69 @@ resource "google_service_account_iam_member" "gha" {
   }
 }
 
+resource "google_monitoring_notification_channel" "slack" {
+  count        = var.slack_channel_name != null && var.slack_auth_token != null ? 1 : 0
+  depends_on   = [google_project_service.apis]
+  project      = local.project_id
+  display_name = "${var.system_name}-${var.env_type}-budget-slack"
+  description  = "Slack notification channel for budget alerts"
+  type         = "slack"
+  labels = {
+    channel_name = var.slack_channel_name
+  }
+  sensitive_labels {
+    auth_token = var.slack_auth_token
+  }
+  user_labels = {
+    name        = "${var.system_name}-${var.env_type}-budget-slack"
+    system-name = var.system_name
+    env-type    = var.env_type
+  }
+}
+
+resource "google_billing_budget" "main" {
+  count           = var.billing_account != null && var.budget_amount != null ? 1 : 0
+  depends_on      = [google_project_service.apis]
+  billing_account = var.billing_account
+  display_name    = "${var.system_name}-${var.env_type}-budget"
+
+  budget_filter {
+    projects = ["projects/${local.project_id}"]
+  }
+
+  amount {
+    specified_amount {
+      currency_code = var.budget_currency_code
+      units         = tostring(var.budget_amount)
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "FORECASTED_SPEND"
+  }
+
+  dynamic "all_updates_rule" {
+    for_each = length(google_monitoring_notification_channel.slack) > 0 ? [true] : []
+    content {
+      monitoring_notification_channels = [google_monitoring_notification_channel.slack[0].id]
+      disable_default_iam_recipients   = false
+    }
+  }
+}
+
 resource "google_kms_key_ring" "main" {
   depends_on = [google_project_service.apis]
   count      = var.create_kms_crypto_key ? 1 : 0

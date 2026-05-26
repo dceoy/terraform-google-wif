@@ -62,6 +62,7 @@ variable "enabled_apis" {
     "storage.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
+    "billingbudgets.googleapis.com",
     "aiplatform.googleapis.com",
     "drive.googleapis.com",
     "sheets.googleapis.com"
@@ -306,4 +307,47 @@ variable "storage_hierarchical_namespace_enabled" {
   description = "Whether to enable hierarchical namespace for the storage bucket"
   type        = bool
   default     = false
+}
+
+variable "billing_account" {
+  description = "Billing account ID used to create the budget alert (set to null to skip creating the budget)"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.billing_account == null || can(regex("^[A-Z0-9]{6}-[A-Z0-9]{6}-[A-Z0-9]{6}$", var.billing_account))
+    error_message = "Billing account ID must be in the format XXXXXX-XXXXXX-XXXXXX."
+  }
+}
+
+variable "budget_amount" {
+  description = "Specified amount for the budget alert"
+  type        = number
+  default     = null
+  validation {
+    condition     = var.budget_amount == null || (var.budget_amount != null && var.budget_amount > 0)
+    error_message = "Budget amount must be greater than 0."
+  }
+}
+
+variable "budget_currency_code" {
+  description = "Currency code for the budget amount (ISO 4217), must match the billing account currency"
+  type        = string
+  default     = "USD"
+  validation {
+    condition     = can(regex("^[A-Z]{3}$", var.budget_currency_code))
+    error_message = "Currency code must be a 3-letter ISO 4217 code."
+  }
+}
+
+variable "slack_channel_name" {
+  description = "Slack channel name (including '#') to receive budget alert notifications (set to null to skip creating the Slack notification channel)"
+  type        = string
+  default     = null
+}
+
+variable "slack_auth_token" {
+  description = "OAuth token used by Cloud Monitoring to post messages to the Slack channel"
+  type        = string
+  default     = null
+  sensitive   = true
 }

@@ -66,7 +66,19 @@ Terraform modules of Google Cloud Workload Identity Federation for AWS and GitHu
     github_repository = "my-github-username/my-repo"
     project_id        = "my-gcp-project-id"
     region            = "us-central1"
+
+    # Optional: Google Cloud budget alert with Slack notifications
+    billing_account      = "XXXXXX-XXXXXX-XXXXXX"
+    budget_amount        = 100
+    budget_currency_code = "USD"
+    slack_channel_name   = "#gcp-budget-alerts"
+    slack_auth_token     = "xoxb-your-slack-oauth-token"
     ```
+
+    The budget alert fires at 50%, 80%, and 100% of current spend and at 100% of forecasted spend.
+    Omit `billing_account`/`budget_amount` to skip creating the budget, and omit
+    `slack_channel_name`/`slack_auth_token` to skip the Slack notification channel
+    (the budget will still notify default billing administrators).
 
 7.  Create a preview.
 
