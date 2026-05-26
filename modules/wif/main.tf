@@ -150,21 +150,18 @@ resource "google_service_account_iam_member" "gha" {
   }
 }
 
-resource "google_monitoring_notification_channel" "slack" {
-  count        = var.slack_channel_name != null && var.slack_auth_token != null ? 1 : 0
+resource "google_monitoring_notification_channel" "budget_email" {
+  for_each     = var.billing_account != null && var.budget_amount != null ? toset(var.budget_notification_emails) : toset([])
   depends_on   = [google_project_service.apis]
   project      = local.project_id
-  display_name = "${var.system_name}-${var.env_type}-budget-slack"
-  description  = "Slack notification channel for budget alerts"
-  type         = "slack"
+  display_name = "${var.system_name}-${var.env_type}-budget-email-${each.key}"
+  description  = "Email notification channel for budget alerts"
+  type         = "email"
   labels = {
-    channel_name = var.slack_channel_name
-  }
-  sensitive_labels {
-    auth_token = var.slack_auth_token
+    email_address = each.key
   }
   user_labels = {
-    name        = "${var.system_name}-${var.env_type}-budget-slack"
+    name        = "${var.system_name}-${var.env_type}-budget-email"
     system-name = var.system_name
     env-type    = var.env_type
   }
@@ -177,7 +174,7 @@ resource "google_billing_budget" "main" {
   display_name    = "${var.system_name}-${var.env_type}-budget"
 
   budget_filter {
-    projects = ["projects/${local.project_id}"]
+    projects = ["projects/${data.google_project.current.number}"]
   }
 
   amount {
@@ -204,12 +201,9 @@ resource "google_billing_budget" "main" {
     spend_basis       = "FORECASTED_SPEND"
   }
 
-  dynamic "all_updates_rule" {
-    for_each = length(google_monitoring_notification_channel.slack) > 0 ? [true] : []
-    content {
-      monitoring_notification_channels = [google_monitoring_notification_channel.slack[0].id]
-      disable_default_iam_recipients   = false
-    }
+  all_updates_rule {
+    monitoring_notification_channels = [for c in google_monitoring_notification_channel.budget_email : c.id]
+    disable_default_iam_recipients   = false
   }
 }
 

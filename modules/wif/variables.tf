@@ -320,34 +320,31 @@ variable "billing_account" {
 }
 
 variable "budget_amount" {
-  description = "Specified amount for the budget alert"
+  description = "Specified amount (whole units) for the budget alert"
   type        = number
   default     = null
   validation {
-    condition     = var.budget_amount == null || (var.budget_amount != null && var.budget_amount > 0)
-    error_message = "Budget amount must be greater than 0."
+    condition     = var.budget_amount == null || (var.budget_amount > 0 && floor(var.budget_amount) == var.budget_amount)
+    error_message = "Budget amount must be a positive whole number (use units only; decimals are not supported)."
   }
 }
 
 variable "budget_currency_code" {
-  description = "Currency code for the budget amount (ISO 4217), must match the billing account currency"
+  description = "Currency code for the budget amount (ISO 4217); when null, defaults to the billing account currency"
   type        = string
-  default     = "USD"
+  default     = null
   validation {
-    condition     = can(regex("^[A-Z]{3}$", var.budget_currency_code))
+    condition     = var.budget_currency_code == null || can(regex("^[A-Z]{3}$", var.budget_currency_code))
     error_message = "Currency code must be a 3-letter ISO 4217 code."
   }
 }
 
-variable "slack_channel_name" {
-  description = "Slack channel name (including '#') to receive budget alert notifications (set to null to skip creating the Slack notification channel)"
-  type        = string
-  default     = null
-}
-
-variable "slack_auth_token" {
-  description = "OAuth token used by Cloud Monitoring to post messages to the Slack channel"
-  type        = string
-  default     = null
-  sensitive   = true
+variable "budget_notification_emails" {
+  description = "List of email addresses to receive budget alert notifications via Cloud Monitoring email notification channels (Cloud Billing Budgets only accept email-type channels)"
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for e in var.budget_notification_emails : can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", e))])
+    error_message = "All entries in budget_notification_emails must be valid email addresses."
+  }
 }
