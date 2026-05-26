@@ -122,3 +122,8 @@ output "budget_email_notification_channel_ids" {
   description = "IDs of the email monitoring notification channels created for budget alerts, keyed by email address"
   value       = { for k, v in google_monitoring_notification_channel.budget_email : k => v.id }
 }
+
+output "budget_slack_notification_channel_id" {
+  description = "ID of the Slack monitoring notification channel created for budget alerts"
+  value       = length(google_monitoring_notification_channel.budget_slack) > 0 ? google_monitoring_notification_channel.budget_slack[0].id : null
+}
