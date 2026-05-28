@@ -340,24 +340,11 @@ variable "budget_currency_code" {
 }
 
 variable "budget_notification_emails" {
-  description = "List of email addresses to receive budget alert notifications via Cloud Monitoring email notification channels"
+  description = "List of email addresses to receive budget alert notifications via Cloud Monitoring email notification channels (Cloud Billing Budgets only accept email-type channels)"
   type        = list(string)
   default     = []
   validation {
     condition     = alltrue([for e in var.budget_notification_emails : can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", e))])
     error_message = "All entries in budget_notification_emails must be valid email addresses."
   }
-}
-
-variable "slack_channel_name" {
-  description = "Slack channel name (including '#') for a Cloud Monitoring Slack notification channel wired to the budget alert (set to null to skip)"
-  type        = string
-  default     = null
-}
-
-variable "slack_auth_token" {
-  description = "OAuth token used by Cloud Monitoring to post messages to the Slack channel (required when slack_channel_name is set)"
-  type        = string
-  default     = null
-  sensitive   = true
 }
