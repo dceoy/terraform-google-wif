@@ -167,26 +167,6 @@ resource "google_monitoring_notification_channel" "budget_email" {
   }
 }
 
-resource "google_monitoring_notification_channel" "budget_slack" {
-  count        = var.billing_account != null && var.budget_amount != null && var.slack_channel_name != null && var.slack_auth_token != null ? 1 : 0
-  depends_on   = [google_project_service.apis]
-  project      = local.project_id
-  display_name = "${var.system_name}-${var.env_type}-budget-slack"
-  description  = "Slack notification channel for budget alerts"
-  type         = "slack"
-  labels = {
-    channel_name = var.slack_channel_name
-  }
-  sensitive_labels {
-    auth_token = var.slack_auth_token
-  }
-  user_labels = {
-    name        = "${var.system_name}-${var.env_type}-budget-slack"
-    system-name = var.system_name
-    env-type    = var.env_type
-  }
-}
-
 resource "google_billing_budget" "main" {
   count           = var.billing_account != null && var.budget_amount != null ? 1 : 0
   depends_on      = [google_project_service.apis]
@@ -222,11 +202,8 @@ resource "google_billing_budget" "main" {
   }
 
   all_updates_rule {
-    monitoring_notification_channels = concat(
-      [for c in google_monitoring_notification_channel.budget_email : c.id],
-      [for c in google_monitoring_notification_channel.budget_slack : c.id],
-    )
-    disable_default_iam_recipients = false
+    monitoring_notification_channels = [for c in google_monitoring_notification_channel.budget_email : c.id]
+    disable_default_iam_recipients   = false
   }
 }
 

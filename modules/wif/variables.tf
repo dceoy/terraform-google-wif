@@ -348,16 +348,3 @@ variable "budget_notification_emails" {
     error_message = "All entries in budget_notification_emails must be valid email addresses."
   }
 }
-
-variable "slack_channel_name" {
-  description = "Slack channel name (including '#') for a Cloud Monitoring Slack notification channel wired to the budget alert (set to null to skip)"
-  type        = string
-  default     = null
-}
-
-variable "slack_auth_token" {
-  description = "OAuth token used by Cloud Monitoring to post messages to the Slack channel (required when slack_channel_name is set)"
-  type        = string
-  default     = null
-  sensitive   = true
-}
