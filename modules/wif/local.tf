@@ -4,6 +4,10 @@ data "google_storage_project_service_account" "current" {
   project = local.project_id
 }
 
+data "google_project" "current" {
+  project_id = local.project_id
+}
+
 locals {
   project_id                = var.project_id != null ? var.project_id : data.google_client_config.current.project
   region                    = var.region != null ? var.region : data.google_client_config.current.region

@@ -150,6 +150,63 @@ resource "google_service_account_iam_member" "gha" {
   }
 }
 
+resource "google_monitoring_notification_channel" "budget_email" {
+  for_each     = var.billing_account != null && var.budget_amount != null ? toset(var.budget_notification_emails) : toset([])
+  depends_on   = [google_project_service.apis]
+  project      = local.project_id
+  display_name = "${var.system_name}-${var.env_type}-budget-email-${each.key}"
+  description  = "Email notification channel for budget alerts"
+  type         = "email"
+  labels = {
+    email_address = each.key
+  }
+  user_labels = {
+    name        = "${var.system_name}-${var.env_type}-budget-email"
+    system-name = var.system_name
+    env-type    = var.env_type
+  }
+}
+
+resource "google_billing_budget" "main" {
+  count           = var.billing_account != null && var.budget_amount != null ? 1 : 0
+  depends_on      = [google_project_service.apis]
+  billing_account = var.billing_account
+  display_name    = "${var.system_name}-${var.env_type}-budget"
+
+  budget_filter {
+    projects = ["projects/${data.google_project.current.number}"]
+  }
+
+  amount {
+    specified_amount {
+      currency_code = var.budget_currency_code
+      units         = tostring(var.budget_amount)
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "FORECASTED_SPEND"
+  }
+
+  all_updates_rule {
+    monitoring_notification_channels = [for c in google_monitoring_notification_channel.budget_email : c.id]
+    disable_default_iam_recipients   = false
+  }
+}
+
 resource "google_kms_key_ring" "main" {
   depends_on = [google_project_service.apis]
   count      = var.create_kms_crypto_key ? 1 : 0

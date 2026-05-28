@@ -62,6 +62,7 @@ variable "enabled_apis" {
     "storage.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
+    "billingbudgets.googleapis.com",
     "aiplatform.googleapis.com",
     "drive.googleapis.com",
     "sheets.googleapis.com"
@@ -306,4 +307,44 @@ variable "storage_hierarchical_namespace_enabled" {
   description = "Whether to enable hierarchical namespace for the storage bucket"
   type        = bool
   default     = false
+}
+
+variable "billing_account" {
+  description = "Billing account ID used to create the budget alert (set to null to skip creating the budget)"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.billing_account == null || can(regex("^[A-Z0-9]{6}-[A-Z0-9]{6}-[A-Z0-9]{6}$", var.billing_account))
+    error_message = "Billing account ID must be in the format XXXXXX-XXXXXX-XXXXXX."
+  }
+}
+
+variable "budget_amount" {
+  description = "Specified amount (whole units) for the budget alert"
+  type        = number
+  default     = null
+  validation {
+    condition     = var.budget_amount == null || (var.budget_amount > 0 && floor(var.budget_amount) == var.budget_amount)
+    error_message = "Budget amount must be a positive whole number (use units only; decimals are not supported)."
+  }
+}
+
+variable "budget_currency_code" {
+  description = "Currency code for the budget amount (ISO 4217); when null, defaults to the billing account currency"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.budget_currency_code == null || can(regex("^[A-Z]{3}$", var.budget_currency_code))
+    error_message = "Currency code must be a 3-letter ISO 4217 code."
+  }
+}
+
+variable "budget_notification_emails" {
+  description = "List of email addresses to receive budget alert notifications via Cloud Monitoring email notification channels"
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for e in var.budget_notification_emails : can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", e))])
+    error_message = "All entries in budget_notification_emails must be valid email addresses."
+  }
 }

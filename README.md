@@ -66,7 +66,26 @@ Terraform modules of Google Cloud Workload Identity Federation for AWS and GitHu
     github_repository = "my-github-username/my-repo"
     project_id        = "my-gcp-project-id"
     region            = "us-central1"
+
+    # Optional: Google Cloud budget alert with email notifications
+    billing_account            = "XXXXXX-XXXXXX-XXXXXX"
+    budget_amount              = 100
+    budget_currency_code       = "USD" # optional; omit to use the billing account currency
+    budget_notification_emails = ["ops@example.com"]
     ```
+
+    The budget alert fires at 50%, 80%, and 100% of current spend and at 100% of forecasted spend.
+    Omit `billing_account`/`budget_amount` to skip creating the budget. When
+    `budget_notification_emails` is empty, the budget still notifies the default
+    billing administrators. Cloud Billing Budgets only support email-type
+    monitoring notification channels; Slack and other channel types must be
+    delivered via Pub/Sub-based programmatic notifications, which are out of
+    scope for this module.
+
+    The principal applying this module needs `roles/billing.costsManager` (or
+    `roles/billing.admin`) on the billing account to create the budget, and
+    `roles/monitoring.notificationChannelEditor` on the project to create the
+    email notification channels.
 
 7.  Create a preview.
 

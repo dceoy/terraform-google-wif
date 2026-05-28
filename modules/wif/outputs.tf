@@ -112,3 +112,13 @@ output "storage_io_bucket_url" {
   description = "Base URL of the cloud storage bucket for IO"
   value       = length(google_storage_bucket.io) > 0 ? google_storage_bucket.io[0].url : null
 }
+
+output "budget_name" {
+  description = "Resource name of the billing budget"
+  value       = length(google_billing_budget.main) > 0 ? google_billing_budget.main[0].name : null
+}
+
+output "budget_email_notification_channel_ids" {
+  description = "IDs of the email monitoring notification channels created for budget alerts, keyed by email address"
+  value       = { for k, v in google_monitoring_notification_channel.budget_email : k => v.id }
+}
