@@ -1,0 +1,400 @@
+variable "system_name" {
+  description = "System name"
+  type        = string
+}
+
+variable "env_type" {
+  description = "Environment type"
+  type        = string
+}
+
+variable "aws_account_id" {
+  description = "AWS account ID that owns the IAM role authorized for Workload Identity Federation"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.aws_account_id == null || can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "AWS account ID must be a 12-digit numeric string."
+  }
+}
+
+variable "aws_iam_role_name" {
+  description = "AWS IAM role name that is authorized for Workload Identity Federation"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.aws_iam_role_name == null || can(regex("^[\\w+=,.@-]+(?:/[\\w+=,.@-]+)*$", var.aws_iam_role_name))
+    error_message = "AWS IAM role name may contain letters, numbers, and the characters +=,.@- with optional path segments separated by '/'."
+  }
+}
+
+variable "github_repository" {
+  description = "GitHub repository in the format 'owner/repo' that is authorized for Workload Identity Federation"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.github_repository == null || can(regex("^[^/]+/[^/]+$", var.github_repository))
+    error_message = "GitHub repository must be in the format 'owner/repo'."
+  }
+}
+
+variable "project_id" {
+  description = "Project ID for Google Cloud resources"
+  type        = string
+  default     = null
+}
+
+variable "region" {
+  description = "Region for Google Cloud resources"
+  type        = string
+  default     = null
+}
+
+variable "enabled_apis" {
+  description = "List of Google APIs that need to be enabled before creating Workload Identity Federation resources"
+  type        = list(string)
+  default = [
+    "cloudkms.googleapis.com",
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "sts.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "storage.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "billingbudgets.googleapis.com",
+    "aiplatform.googleapis.com",
+    "drive.googleapis.com",
+    "sheets.googleapis.com"
+  ]
+}
+
+variable "project_service_disable_on_destroy" {
+  description = "Set to true to disable the API when destroying google_project_service"
+  type        = bool
+  default     = false
+}
+
+variable "project_service_disable_dependent_services" {
+  description = "Disable any services dependent on the API when disabling it"
+  type        = bool
+  default     = false
+}
+
+variable "service_account_create_ignore_already_exists" {
+  description = "Ignore AlreadyExists errors when creating the service account"
+  type        = bool
+  default     = false
+}
+
+variable "service_account_iam_condition_expression" {
+  description = "Optional CEL expression for the service account IAM binding"
+  type        = string
+  default     = null
+}
+
+variable "service_account_iam_condition_title" {
+  description = "Title for the service account IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "service_account_iam_condition_description" {
+  description = "Description for the service account IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_roles_for_aws" {
+  description = "List of project-level IAM roles to grant to the WIF service account for AWS"
+  type        = list(string)
+  default = [
+    "roles/aiplatform.user",
+    "roles/storage.objectAdmin",
+    "roles/drive.file"
+  ]
+}
+
+variable "project_iam_member_roles_for_gha" {
+  description = "List of project-level IAM roles to grant to the WIF service account for GitHub Actions"
+  type        = list(string)
+  default = [
+    "roles/config.admin",
+    "roles/cloudkms.admin",
+    "roles/storage.admin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/iam.workloadIdentityPoolAdmin",
+    "roles/iam.serviceAccountUser",
+    "roles/resourcemanager.projectIamAdmin"
+  ]
+}
+
+variable "project_iam_member_condition_expression" {
+  description = "Optional CEL expression for the project IAM binding"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_condition_title" {
+  description = "Title for the project IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "project_iam_member_condition_description" {
+  description = "Description for the project IAM condition"
+  type        = string
+  default     = null
+}
+
+variable "create_kms_crypto_key" {
+  description = "Whether to create a KMS crypto key for storage bucket encryption"
+  type        = bool
+  default     = false
+}
+
+variable "create_storage_io_bucket" {
+  description = "Whether to create a storage bucket for I/O operations"
+  type        = bool
+  default     = false
+}
+
+variable "create_storage_logs_bucket" {
+  description = "Whether to create a storage bucket for logs if storage_logging_log_bucket is not provided"
+  type        = bool
+  default     = false
+}
+
+variable "kms_purpose" {
+  description = "Immutable purpose of the KMS crypto key"
+  type        = string
+  default     = "ENCRYPT_DECRYPT"
+}
+
+variable "kms_rotation_period" {
+  description = "Rotation period for the KMS crypto key"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.kms_rotation_period == null || can(regex("^[0-9]+(\\.[0-9]{1,9})?s$", var.kms_rotation_period))
+    error_message = "Rotation period must be in the format of a decimal number with up to 9 fractional digits, followed by the letter s (seconds)."
+  }
+}
+
+variable "kms_destroy_scheduled_duration" {
+  description = "Period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED (if not specified, the default duration is 30 days)"
+  type        = string
+  default     = null
+}
+
+variable "kms_import_only" {
+  description = "Whether to contain only imported versions of the KMS crypto key"
+  type        = bool
+  default     = false
+}
+
+variable "kms_skip_initial_version_creation" {
+  description = "Whether to create a KMS crypto key without any crypto key versions"
+  type        = bool
+  default     = false
+}
+
+variable "kms_version_template_algorithm" {
+  description = "Algorithm to use when creating a version based on the template for the KMS crypto key"
+  type        = string
+  default     = null
+}
+
+variable "kms_version_template_protection_level" {
+  description = "Protection level to use when creating a version based on the template for the KMS crypto key"
+  type        = string
+  default     = "SOFTWARE"
+  validation {
+    condition     = contains(["SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC"], var.kms_version_template_protection_level)
+    error_message = "Protection level must be SOFTWARE, HSM, EXTERNAL, or EXTERNAL_VPC."
+  }
+}
+
+variable "force_destroy" {
+  description = "Whether to delete all contained objects when deleting the bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_class" {
+  description = "Storage class of the storage bucket"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_class == null || var.storage_class == "STANDARD" || var.storage_class == "MULTI_REGIONAL" || var.storage_class == "REGIONAL" || var.storage_class == "NEARLINE" || var.storage_class == "COLDLINE" || var.storage_class == "ARCHIVE"
+    error_message = "Storage class must be one of STANDARD, MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, or ARCHIVE."
+  }
+}
+
+variable "storage_versioning_enabled" {
+  description = "Whether to enable versioning for objects in the storage bucket"
+  type        = bool
+  default     = true
+}
+
+variable "storage_autoclass_enabled" {
+  description = "Whether to enable autoclass for the storage bucket"
+  type        = bool
+  default     = true
+}
+
+variable "storage_autoclass_terminal_storage_class" {
+  description = "Storage class that objects in the storage bucket eventually transition to if they are not read for a certain length of time"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_autoclass_terminal_storage_class == null || var.storage_autoclass_terminal_storage_class == "NEARLINE" || var.storage_autoclass_terminal_storage_class == "ARCHIVE"
+    error_message = "Terminal storage class must be either NEARLINE or ARCHIVE."
+  }
+}
+
+variable "storage_default_event_based_hold" {
+  description = "Whether to automatically apply an eventBasedHold to new objects added to the storage bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_retention_policy_retention_period" {
+  description = "The period of time, in seconds, that objects in the storage bucket must be retained and cannot be deleted, overwritten, or archived"
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.storage_retention_policy_retention_period >= 0 && var.storage_retention_policy_retention_period < 3155760000
+    error_message = "Retention period must be greater than or equal to 0 and less than 3,155,760,000 seconds."
+  }
+}
+
+variable "storage_logging_log_bucket" {
+  description = "Log bucket for access and storage logs on the storage bucket"
+  type        = string
+  default     = null
+}
+
+variable "storage_requester_pays" {
+  description = "Whether to enable requester pays on the storage bucket"
+  type        = bool
+  default     = false
+}
+
+variable "storage_rpo" {
+  description = "Recovery point objective for cross-region replication of the storage bucket (applicable only for dual and multi-region buckets)"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.storage_rpo == null || var.storage_rpo == "DEFAULT" || var.storage_rpo == "ASYNC_TURBO"
+    error_message = "RPO must be either DEFAULT or ASYNC_TURBO."
+  }
+}
+
+variable "storage_encryption_default_kms_key_name" {
+  description = "ID of a Cloud KMS key that will be used to encrypt objects inserted into the storage bucket"
+  type        = string
+  default     = null
+}
+
+variable "storage_custom_placement_config_data_locations" {
+  description = "List of individual regions that comprise a dual-region storage bucket"
+  type        = list(string)
+  default     = []
+}
+
+variable "storage_hierarchical_namespace_enabled" {
+  description = "Whether to enable hierarchical namespace for the storage bucket"
+  type        = bool
+  default     = false
+}
+
+variable "billing_account" {
+  description = "Billing account ID used to create the budget alert (set to null to skip creating the budget)"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.billing_account == null || can(regex("^[A-Z0-9]{6}-[A-Z0-9]{6}-[A-Z0-9]{6}$", var.billing_account))
+    error_message = "Billing account ID must be in the format XXXXXX-XXXXXX-XXXXXX."
+  }
+}
+
+variable "budget_amount" {
+  description = "Specified amount (whole units) for the budget alert"
+  type        = number
+  default     = null
+  validation {
+    condition     = var.budget_amount == null || (var.budget_amount > 0 && floor(var.budget_amount) == var.budget_amount)
+    error_message = "Budget amount must be a positive whole number (use units only; decimals are not supported)."
+  }
+}
+
+variable "budget_currency_code" {
+  description = "Currency code for the budget amount (ISO 4217); when null, defaults to the billing account currency"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.budget_currency_code == null || can(regex("^[A-Z]{3}$", var.budget_currency_code))
+    error_message = "Currency code must be a 3-letter ISO 4217 code."
+  }
+}
+
+variable "budget_notification_emails" {
+  description = "List of email addresses to receive budget alert notifications via Cloud Monitoring email notification channels"
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for e in var.budget_notification_emails : can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", e))])
+    error_message = "All entries in budget_notification_emails must be valid email addresses."
+  }
+}
+
+module "wif" {
+  source = "../../modules/wif"
+  system_name = var.system_name
+  env_type = var.env_type
+  aws_account_id = var.aws_account_id
+  aws_iam_role_name = var.aws_iam_role_name
+  github_repository = var.github_repository
+  project_id = var.project_id
+  region = var.region
+  enabled_apis = var.enabled_apis
+  project_service_disable_on_destroy = var.project_service_disable_on_destroy
+  project_service_disable_dependent_services = var.project_service_disable_dependent_services
+  service_account_create_ignore_already_exists = var.service_account_create_ignore_already_exists
+  service_account_iam_condition_expression = var.service_account_iam_condition_expression
+  service_account_iam_condition_title = var.service_account_iam_condition_title
+  service_account_iam_condition_description = var.service_account_iam_condition_description
+  project_iam_member_roles_for_aws = var.project_iam_member_roles_for_aws
+  project_iam_member_roles_for_gha = var.project_iam_member_roles_for_gha
+  project_iam_member_condition_expression = var.project_iam_member_condition_expression
+  project_iam_member_condition_title = var.project_iam_member_condition_title
+  project_iam_member_condition_description = var.project_iam_member_condition_description
+  create_kms_crypto_key = var.create_kms_crypto_key
+  create_storage_io_bucket = var.create_storage_io_bucket
+  create_storage_logs_bucket = var.create_storage_logs_bucket
+  kms_purpose = var.kms_purpose
+  kms_rotation_period = var.kms_rotation_period
+  kms_destroy_scheduled_duration = var.kms_destroy_scheduled_duration
+  kms_import_only = var.kms_import_only
+  kms_skip_initial_version_creation = var.kms_skip_initial_version_creation
+  kms_version_template_algorithm = var.kms_version_template_algorithm
+  kms_version_template_protection_level = var.kms_version_template_protection_level
+  force_destroy = var.force_destroy
+  storage_class = var.storage_class
+  storage_versioning_enabled = var.storage_versioning_enabled
+  storage_autoclass_enabled = var.storage_autoclass_enabled
+  storage_autoclass_terminal_storage_class = var.storage_autoclass_terminal_storage_class
+  storage_default_event_based_hold = var.storage_default_event_based_hold
+  storage_retention_policy_retention_period = var.storage_retention_policy_retention_period
+  storage_logging_log_bucket = var.storage_logging_log_bucket
+  storage_requester_pays = var.storage_requester_pays
+  storage_rpo = var.storage_rpo
+  storage_encryption_default_kms_key_name = var.storage_encryption_default_kms_key_name
+  storage_custom_placement_config_data_locations = var.storage_custom_placement_config_data_locations
+  storage_hierarchical_namespace_enabled = var.storage_hierarchical_namespace_enabled
+  billing_account = var.billing_account
+  budget_amount = var.budget_amount
+  budget_currency_code = var.budget_currency_code
+  budget_notification_emails = var.budget_notification_emails
+}
